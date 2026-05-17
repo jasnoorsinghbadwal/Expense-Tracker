@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useFinance } from '../context/FinanceContext';
-import { Wallet, ArrowRight, Sun, Moon } from 'lucide-react';
+import { Wallet, ArrowRight, Sun, Moon, TrendingUp } from 'lucide-react';
 
 export function Onboarding() {
   const { state, dispatch } = useFinance();
