@@ -1,8 +1,8 @@
-# FinTrack - Premium Personal Finance Manager
+# Pay Trix - Premium Personal Finance Manager
 
-![FinTrack Banner](https://via.placeholder.com/1200x400/1E1E1E/F5A623?text=FinTrack+Expense+Manager)
+![Pay Trix Banner](https://via.placeholder.com/1200x400/1E1E1E/F5A623?text=Pay+Trix)
 
-**FinTrack** is a state-of-the-art, privacy-first personal finance application built to help you take complete control of your wealth. Featuring a premium "dark-luxe" aesthetic, seamless wallet tracking, and intelligent analytics, FinTrack operates entirely in your browser—meaning your financial data never leaves your device.
+**Pay Trix** is a state-of-the-art, privacy-first personal finance application built to help you take complete control of your wealth. Featuring a premium "dark-luxe" aesthetic, seamless wallet tracking, and intelligent analytics, Pay Trix operates entirely in your browser—meaning your financial data never leaves your device.
 
 ## ✨ Key Features
 
@@ -12,7 +12,7 @@
 - **Privacy First (100% Local)**: No databases, no servers, no subscriptions. All your data is securely stored in your browser's `localStorage`.
 - **Data Export & Backup**: Download your entire transaction history and account states as a `.json` backup file at any time.
 - **Theming Engine**: Toggle instantly between a sleek Light Mode and a premium Dark Mode. Both themes utilize a custom glassmorphism UI system.
-- **Installable PWA**: FinTrack is built as a Progressive Web App. Install it natively to your desktop or mobile device for an app-like experience.
+- **Installable PWA**: Pay Trix is built as a Progressive Web App. Install it natively to your desktop or mobile device for an app-like experience.
 - **Mobile First**: Fluid, responsive design with a bottom navigation bar for comfortable thumb-reach on mobile devices.
 
 ## 🛠 Tech Stack
@@ -36,8 +36,8 @@ Make sure you have [Node.js](https://nodejs.org/) installed on your computer.
 
 1. **Clone the repository** (or download the ZIP file and extract it):
    ```bash
-   git clone https://github.com/your-username/fintech-expense-tracker.git
-   cd fintech-expense-tracker
+   git clone https://github.com/your-username/paytrix.git
+   cd paytrix
    ```
 
 2. **Install dependencies**:
@@ -54,7 +54,7 @@ Make sure you have [Node.js](https://nodejs.org/) installed on your computer.
 
 ## 📱 Progressive Web App (PWA) Setup
 
-FinTrack includes a `manifest.json` and a service worker. To install it natively:
+Pay Trix includes a `manifest.json` and a service worker. To install it natively:
 1. Open the app in a supported browser (e.g., Chrome, Edge).
 2. Click the **"Install App"** button in the header, or look for the install icon in your browser's address bar.
 3. The app will now be available on your desktop or home screen!

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Sun, Moon, Download } from 'lucide-react';
+import { Sun, Moon, Download, X } from 'lucide-react';
 import { useFinance } from '../context/FinanceContext';
 import toast from 'react-hot-toast';
 
@@ -26,7 +26,18 @@ export function Header({ title }) {
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) {
-      toast('To install the app, look for the "Install" icon in your browser address bar or menu!', { icon: '💡' });
+      toast.dismiss();
+      toast(
+        (t) => (
+          <span className="flex items-center gap-3">
+            <span>💡 To install the app, look for the "Install" icon in your browser address bar or menu!</span>
+            <button onClick={() => toast.dismiss(t.id)} className="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-white/10 text-gray-500 dark:text-gray-400 transition-colors shrink-0">
+              <X size={16} />
+            </button>
+          </span>
+        ),
+        { duration: 4000 }
+      );
       return;
     }
     deferredPrompt.prompt();

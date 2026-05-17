@@ -1,5 +1,5 @@
 // Basic service worker for PWA installability
-const CACHE_NAME = 'fintrack-cache-v1';
+const CACHE_NAME = 'paytrix-cache-v1';
 
 self.addEventListener('install', (e) => {
   e.waitUntil(

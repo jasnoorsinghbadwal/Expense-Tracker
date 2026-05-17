@@ -17,7 +17,7 @@ export function Sidebar({ currentTab, setCurrentTab }) {
         <div className="w-8 h-8 bg-gold-500 rounded-lg flex items-center justify-center text-navy-900 shadow-lg shadow-gold-500/20">
           <TrendingUp size={20} strokeWidth={3} />
         </div>
-        FinTrack
+        Pay Trix
       </h1>
       <nav className="flex-1 space-y-3">
         {tabs.map((tab) => {

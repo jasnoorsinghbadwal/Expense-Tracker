@@ -20,7 +20,7 @@ export function ProfilePage() {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
     const downloadAnchorNode = document.createElement('a');
     downloadAnchorNode.setAttribute("href",     dataStr);
-    downloadAnchorNode.setAttribute("download", "fintrack_backup_" + new Date().toISOString().split('T')[0] + ".json");
+    downloadAnchorNode.setAttribute("download", "paytrix_backup_" + new Date().toISOString().split('T')[0] + ".json");
     document.body.appendChild(downloadAnchorNode); // required for firefox
     downloadAnchorNode.click();
     downloadAnchorNode.remove();

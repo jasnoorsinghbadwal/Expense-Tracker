@@ -137,7 +137,7 @@ export function TransactionModal({ isOpen, onClose, editData = null }) {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
+                <div className="min-w-0">
                   <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1.5 ml-1">Date</label>
                   <input 
                     type="date" 
@@ -147,7 +147,7 @@ export function TransactionModal({ isOpen, onClose, editData = null }) {
                     required
                   />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1.5 ml-1">Category</label>
                   <select 
                     value={category}

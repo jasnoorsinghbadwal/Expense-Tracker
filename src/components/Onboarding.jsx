@@ -31,11 +31,13 @@ export function Onboarding() {
         
         <div className="relative z-10">
             <div className="w-16 h-16 bg-gradient-to-tr from-gold-500 to-amber-300 rounded-2xl flex items-center justify-center text-navy-900 mx-auto mb-8 shadow-lg shadow-gold-500/30">
-              <Wallet size={32} strokeWidth={2.5} />
+              <TrendingUp size={28} strokeWidth={2.5} />
             </div>
             
-            <h1 className="text-3xl font-bold text-center mb-3 font-sans tracking-tight text-gray-900 dark:text-white">Welcome to FinTrack</h1>
-            <p className="text-gray-500 dark:text-gray-400 text-center mb-10 text-sm">Set up your financial profile to get started</p>
+            <div>
+              <h1 className="text-3xl font-bold text-center mb-3 font-sans tracking-tight text-gray-900 dark:text-white">Welcome to Pay Trix</h1>
+              <p className="text-gray-500 dark:text-gray-400 text-center text-sm md:text-base px-4 mb-10">Let's set up your profile to start tracking your finances.</p>
+            </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>

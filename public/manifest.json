@@ -1,6 +1,6 @@
 {
-  "name": "FinTrack Expense Manager",
-  "short_name": "FinTrack",
+  "name": "Pay Trix",
+  "short_name": "Pay Trix",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0B132B",
