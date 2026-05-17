@@ -38,20 +38,20 @@ export function PeriodSelector() {
   };
 
   return (
-    <div className="relative">
+    <div className="relative min-w-0">
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gray-100 dark:bg-charcoal-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-white/5 hover:bg-gray-200 dark:hover:bg-charcoal-900 transition-colors text-xs md:text-sm font-medium shadow-sm shrink-0"
+        className="flex items-center gap-1.5 xs:gap-2 px-2.5 xs:px-3 py-2 rounded-xl bg-gray-100 dark:bg-charcoal-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-white/5 hover:bg-gray-200 dark:hover:bg-charcoal-900 transition-colors text-xs md:text-sm font-medium shadow-sm shrink-0 min-w-0"
       >
-        <Calendar size={15} className="text-gold-500" />
-        <span>{dateInfo.label}</span>
-        <ChevronDown size={14} className="text-gray-400" />
+        <Calendar size={14} className="text-gold-500 shrink-0" />
+        <span className="truncate max-w-[80px] xs:max-w-[120px] sm:max-w-none">{dateInfo.label}</span>
+        <ChevronDown size={12} className="text-gray-400 shrink-0" />
       </button>
 
       {isOpen && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)}></div>
-          <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-charcoal-850 border border-gray-200 dark:border-white/10 rounded-2xl shadow-xl p-4 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+          <div className="absolute left-0 sm:left-auto sm:right-0 mt-2 w-[calc(100vw-32px)] sm:w-72 max-w-xs bg-white dark:bg-charcoal-850 border border-gray-200 dark:border-white/10 rounded-2xl shadow-xl p-4 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
             <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 ml-1">Select Period</h4>
             <div className="space-y-1">
               {periods.map(p => (
