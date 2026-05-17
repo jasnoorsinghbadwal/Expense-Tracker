@@ -28,7 +28,7 @@ export function TransactionsPage() {
   });
 
   return (
-    <div className="space-y-4 md:space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 h-full flex flex-col pb-4">
+    <div className="space-y-4 md:space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 sm:h-full flex flex-col pb-4">
       <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-between items-center glass p-3 md:p-4 rounded-2xl shrink-0">
         <div className="relative w-full sm:w-96">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
@@ -112,7 +112,7 @@ export function TransactionsPage() {
       </div>
 
       {/* Mobile Card View */}
-      <div className="sm:hidden flex-1 overflow-y-auto space-y-3">
+      <div className="sm:hidden space-y-3">
         {filteredTransactions.map(t => {
           const cat = getCategory(t.category);
           const Icon = cat.icon;
