@@ -28,6 +28,13 @@ function App() {
     }
   }, [state.settings.theme]);
 
+  // Reset tab to dashboard (home) immediately upon completing onboarding
+  useEffect(() => {
+    if (state.settings.isSetup) {
+      setCurrentTab('dashboard');
+    }
+  }, [state.settings.isSetup]);
+
   if (!state.settings.isSetup) {
     return (
       <>
