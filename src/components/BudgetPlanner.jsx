@@ -30,6 +30,17 @@ export function BudgetPlanner() {
   const customEndDate = state.settings.customEndDate;
   const { start: globalStart, end: globalEnd } = getPeriodDates(selectedPeriod, customStartDate, customEndDate);
 
+  // Safe date comparison helper – returns a valid Date or a fallback
+  const safeDate = (dateStr, fallback) => {
+    if (!dateStr) return fallback;
+    const d = parseLocalDate(dateStr);
+    return isNaN(d.getTime()) ? fallback : d;
+  };
+
+  // The far future / far past sentinels for open-ended budgets
+  const FAR_FUTURE = new Date(2999, 11, 31);
+  const FAR_PAST   = new Date(0);
+
   // Compute savings across dismissed budgets, filtered by the selected savings period
   const { dismissedBudgetsSavings, savingsPeriodLabel } = useMemo(() => {
     const { start: sStart, end: sEnd, label } = getPeriodDates(
@@ -72,17 +83,6 @@ export function BudgetPlanner() {
       };
     });
   }, [state.budgets, state.transactions, today]);
-
-  // Safe date comparison helper – returns a valid Date or a fallback
-  const safeDate = (dateStr, fallback) => {
-    if (!dateStr) return fallback;
-    const d = parseLocalDate(dateStr);
-    return isNaN(d.getTime()) ? fallback : d;
-  };
-
-  // The far future / far past sentinels for open-ended budgets
-  const FAR_FUTURE = new Date(2999, 11, 31);
-  const FAR_PAST   = new Date(0);
 
   // Split into tabs and respect global period filtering (for Active and History)
   const activeBudgets = useMemo(() => {
