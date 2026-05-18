@@ -3,6 +3,7 @@ import { useFinance } from '../context/FinanceContext';
 import { Target, AlertCircle, Plus, X, Trash2, Calendar, Award, History, Timer, ChevronDown } from 'lucide-react';
 import { CATEGORIES, getCategory } from '../utils/constants';
 import { getBudgetStatus, parseLocalDate, getPeriodDates } from '../utils/dateFilters';
+import { SubscriptionsTracker } from './SubscriptionsTracker';
 import { endOfMonth, endOfWeek } from 'date-fns';
 import toast from 'react-hot-toast';
 
@@ -21,6 +22,7 @@ export function BudgetPlanner() {
   const [savingsCustomStart, setSavingsCustomStart] = useState('');
   const [savingsCustomEnd, setSavingsCustomEnd] = useState('');
   const [showSavingsPicker, setShowSavingsPicker] = useState(false);
+  const [activeBudgetSubTab, setActiveBudgetSubTab] = useState('budgets');
 
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -165,8 +167,49 @@ export function BudgetPlanner() {
     return 'Starts soon';
   };
 
+  if (activeBudgetSubTab === 'subscriptions') {
+    return (
+      <div className="space-y-6 md:space-y-8 animate-in fade-in duration-500 pb-4 h-full">
+        {/* Sub-tab segmented control for mobile screens & unified budget view */}
+        <div className="flex bg-gray-100 dark:bg-charcoal-800 p-1 rounded-2xl max-w-md border border-gray-200 dark:border-white/5 shadow-sm">
+          <button
+            onClick={() => setActiveBudgetSubTab('budgets')}
+            className={`flex-1 py-2 text-xs md:text-sm font-bold rounded-xl transition-all text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white`}
+          >
+            📊 Category Budgets
+          </button>
+          <button
+            onClick={() => setActiveBudgetSubTab('subscriptions')}
+            className={`flex-1 py-2 text-xs md:text-sm font-bold rounded-xl transition-all bg-gold-500 text-navy-900 shadow-md`}
+          >
+            ⏰ Subscriptions Tracker
+          </button>
+        </div>
+        <div className="animate-in fade-in duration-300">
+          <SubscriptionsTracker />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-4">
+      
+      {/* Sub-tab segmented control for mobile screens & unified budget view */}
+      <div className="flex bg-gray-100 dark:bg-charcoal-800 p-1 rounded-2xl max-w-md border border-gray-200 dark:border-white/5 shadow-sm">
+        <button
+          onClick={() => setActiveBudgetSubTab('budgets')}
+          className={`flex-1 py-2 text-xs md:text-sm font-bold rounded-xl transition-all bg-gold-500 text-navy-900 shadow-md`}
+        >
+          📊 Category Budgets
+        </button>
+        <button
+          onClick={() => setActiveBudgetSubTab('subscriptions')}
+          className={`flex-1 py-2 text-xs md:text-sm font-bold rounded-xl transition-all text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white`}
+        >
+          ⏰ Subscriptions Tracker
+        </button>
+      </div>
       
       {/* Metrics Banner & Header */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">

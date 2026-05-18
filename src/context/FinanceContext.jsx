@@ -7,6 +7,7 @@ const initialState = {
   budgets: [], // Array of { id, category, amount, accountId, period, startDate, endDate, dismissed }
   accounts: [], // { id, name, type, initialBalance }
   goals: [], // Array of { id, name, targetAmount, currentAmount, category, color, deadline, history: [] }
+  subscriptions: [], // Array of { id, name, amount, accountId, billingCycle, nextBillingDate, category, active }
   settings: {
     theme: 'dark',
     currency: '₹',
@@ -64,6 +65,13 @@ function financeReducer(state, action) {
         ...state,
         budgets: state.budgets.map(b => b.id === action.payload ? { ...b, dismissed: true } : b)
       };
+
+    case 'ADD_SUBSCRIPTION':
+      return { ...state, subscriptions: [...(state.subscriptions || []), action.payload] };
+    case 'EDIT_SUBSCRIPTION':
+      return { ...state, subscriptions: (state.subscriptions || []).map(s => s.id === action.payload.id ? action.payload : s) };
+    case 'DELETE_SUBSCRIPTION':
+      return { ...state, subscriptions: (state.subscriptions || []).filter(s => s.id !== action.payload) };
 
     case 'ADD_ACCOUNT':
       return { ...state, accounts: [...(state.accounts || []), action.payload] };

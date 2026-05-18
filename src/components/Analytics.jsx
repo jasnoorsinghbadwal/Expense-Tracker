@@ -1,13 +1,15 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useFinance } from '../context/FinanceContext';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { CATEGORIES } from '../utils/constants';
 import { isTransactionInPeriod, getPeriodDates, parseLocalDate } from '../utils/dateFilters';
+import { Forecaster } from './Forecaster';
 
 export function Analytics() {
   const { state } = useFinance();
   const currency = state.settings.currency;
   const isDark = state.settings.theme === 'dark';
+  const [activeSubTab, setActiveSubTab] = useState('stats');
 
   const periodLabel = useMemo(() => {
     const { selectedPeriod, customStartDate, customEndDate } = state.settings;
@@ -131,91 +133,113 @@ export function Analytics() {
   const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches;
 
   return (
-    <div className="space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-4">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
-        
-        {/* Income vs Expenses Bar Chart */}
-        <div className="glass p-5 md:p-6 rounded-2xl h-[350px] md:h-[400px] flex flex-col relative">
-          <h3 className="text-base md:text-lg font-semibold tracking-wide mb-4 md:mb-6 text-gray-900 dark:text-white">{barChartTitle}</h3>
-          <div className="flex-1 w-full relative">
-            {state.transactions.length === 0 ? (
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-500">
-                <p className="text-sm md:text-base">No data available</p>
-              </div>
-            ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={barData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <XAxis dataKey="name" stroke={isDark ? "#6B7280" : "#9CA3AF"} fontSize={10} tickLine={false} axisLine={false} />
-                  <YAxis stroke={isDark ? "#6B7280" : "#9CA3AF"} fontSize={10} tickLine={false} axisLine={false} tickFormatter={(value) => `${value >= 1000 ? (value/1000).toFixed(1)+'k' : value}`} />
-                  <Tooltip 
-                    trigger={isMobile ? "click" : "hover"}
-                    wrapperStyle={{ pointerEvents: 'none' }}
-                    contentStyle={{ backgroundColor: isDark ? '#121212' : '#ffffff', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)', borderRadius: '12px', color: isDark ? '#fff' : '#000' }}
-                    cursor={{ fill: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }}
-                    formatter={(value) => [`${currency}${value.toLocaleString()}`, '']}
-                  />
-                  <Legend iconType="circle" wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
-                  <Bar dataKey="income" name="Income" fill="#10B981" radius={[4, 4, 0, 0]} barSize={20} />
-                  <Bar dataKey="expense" name="Expenses" fill="#F43F5E" radius={[4, 4, 0, 0]} barSize={20} />
-                </BarChart>
-              </ResponsiveContainer>
-            )}
-          </div>
-          {isMobile && state.transactions.length > 0 && (
-            <p className="text-[10px] text-gray-400 dark:text-gray-500 text-center mt-2">Tap bars to view values • Tap outside to clear</p>
-          )}
-        </div>
-
-        {/* Expenses Breakdown Pie Chart */}
-        <div className="glass p-5 md:p-6 rounded-2xl h-[350px] md:h-[400px] flex flex-col relative">
-          <h3 className="text-base md:text-lg font-semibold tracking-wide mb-4 md:mb-6 text-gray-900 dark:text-white truncate">Expense Breakdown ({periodLabel})</h3>
-          <div className="flex-1 w-full relative">
-            {pieData.data.length === 0 ? (
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-500">
-                <p className="text-sm md:text-base">No expenses in this period</p>
-              </div>
-            ) : (
-              <>
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={pieData.data}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={90}
-                      paddingAngle={5}
-                      dataKey="value"
-                      stroke="none"
-                    >
-                      {pieData.data.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip 
-                       trigger={isMobile ? "click" : "hover"}
-                       wrapperStyle={{ pointerEvents: 'none' }}
-                       contentStyle={{ backgroundColor: isDark ? '#121212' : '#ffffff', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)', borderRadius: '12px', color: isDark ? '#fff' : '#000' }}
-                       itemStyle={{ color: isDark ? '#fff' : '#000', fontFamily: 'JetBrains Mono' }}
-                       formatter={(value) => [`${currency}${value.toLocaleString()}`, '']}
-                    />
-                    <Legend iconType="circle" wrapperStyle={{ fontSize: '12px' }} />
-                  </PieChart>
-                </ResponsiveContainer>
-                {/* Center Text for Donut */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none pb-8">
-                   <span className="text-[10px] md:text-sm text-gray-500 dark:text-gray-400">Total Spent</span>
-                   <span className="text-lg md:text-2xl font-mono font-bold text-gray-900 dark:text-white">{currency}{pieData.totalSpent.toLocaleString()}</span>
-                </div>
-              </>
-            )}
-          </div>
-          {isMobile && pieData.data.length > 0 && (
-            <p className="text-[10px] text-gray-400 dark:text-gray-500 text-center mt-2">Tap segments to view values</p>
-          )}
-        </div>
-
+    <div className="space-y-6 md:space-y-8 animate-in fade-in duration-500 pb-4 h-full">
+      {/* Sub-tab segmented control for mobile screens & unified analytics view */}
+      <div className="flex bg-gray-100 dark:bg-charcoal-800 p-1 rounded-2xl max-w-md border border-gray-200 dark:border-white/5 shadow-sm">
+        <button
+          onClick={() => setActiveSubTab('stats')}
+          className={`flex-1 py-2 text-xs md:text-sm font-bold rounded-xl transition-all ${activeSubTab === 'stats' ? 'bg-gold-500 text-navy-900 shadow-md' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
+        >
+          📈 Analytics & Reports
+        </button>
+        <button
+          onClick={() => setActiveSubTab('forecast')}
+          className={`flex-1 py-2 text-xs md:text-sm font-bold rounded-xl transition-all ${activeSubTab === 'forecast' ? 'bg-gold-500 text-navy-900 shadow-md' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
+        >
+          🔮 Cash Forecaster
+        </button>
       </div>
+
+      {activeSubTab === 'stats' ? (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 animate-in fade-in duration-300">
+          
+          {/* Income vs Expenses Bar Chart */}
+          <div className="glass p-5 md:p-6 rounded-2xl h-[350px] md:h-[400px] flex flex-col relative">
+            <h3 className="text-base md:text-lg font-semibold tracking-wide mb-4 md:mb-6 text-gray-900 dark:text-white">{barChartTitle}</h3>
+            <div className="flex-1 w-full relative">
+              {state.transactions.length === 0 ? (
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-500">
+                  <p className="text-sm md:text-base">No data available</p>
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={barData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <XAxis dataKey="name" stroke={isDark ? "#6B7280" : "#9CA3AF"} fontSize={10} tickLine={false} axisLine={false} />
+                    <YAxis stroke={isDark ? "#6B7280" : "#9CA3AF"} fontSize={10} tickLine={false} axisLine={false} tickFormatter={(value) => `${value >= 1000 ? (value/1000).toFixed(1)+'k' : value}`} />
+                    <Tooltip 
+                      trigger={isMobile ? "click" : "hover"}
+                      wrapperStyle={{ pointerEvents: 'none' }}
+                      contentStyle={{ backgroundColor: isDark ? '#121212' : '#ffffff', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)', borderRadius: '12px', color: isDark ? '#fff' : '#000' }}
+                      cursor={{ fill: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }}
+                      formatter={(value) => [`${currency}${value.toLocaleString()}`, '']}
+                    />
+                    <Legend iconType="circle" wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
+                    <Bar dataKey="income" name="Income" fill="#10B981" radius={[4, 4, 0, 0]} barSize={20} />
+                    <Bar dataKey="expense" name="Expenses" fill="#F43F5E" radius={[4, 4, 0, 0]} barSize={20} />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </div>
+            {isMobile && state.transactions.length > 0 && (
+              <p className="text-[10px] text-gray-400 dark:text-gray-500 text-center mt-2">Tap bars to view values • Tap outside to clear</p>
+            )}
+          </div>
+
+          {/* Expenses Breakdown Pie Chart */}
+          <div className="glass p-5 md:p-6 rounded-2xl h-[350px] md:h-[400px] flex flex-col relative">
+            <h3 className="text-base md:text-lg font-semibold tracking-wide mb-4 md:mb-6 text-gray-900 dark:text-white truncate">Expense Breakdown ({periodLabel})</h3>
+            <div className="flex-1 w-full relative">
+              {pieData.data.length === 0 ? (
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-500">
+                  <p className="text-sm md:text-base">No expenses in this period</p>
+                </div>
+              ) : (
+                <>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={pieData.data}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={90}
+                        paddingAngle={5}
+                        dataKey="value"
+                        stroke="none"
+                      >
+                        {pieData.data.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip 
+                         trigger={isMobile ? "click" : "hover"}
+                         wrapperStyle={{ pointerEvents: 'none' }}
+                         contentStyle={{ backgroundColor: isDark ? '#121212' : '#ffffff', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)', borderRadius: '12px', color: isDark ? '#fff' : '#000' }}
+                         itemStyle={{ color: isDark ? '#fff' : '#000', fontFamily: 'JetBrains Mono' }}
+                         formatter={(value) => [`${currency}${value.toLocaleString()}`, '']}
+                      />
+                      <Legend iconType="circle" wrapperStyle={{ fontSize: '12px' }} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  {/* Center Text for Donut */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none pb-8">
+                     <span className="text-[10px] md:text-sm text-gray-500 dark:text-gray-400">Total Spent</span>
+                     <span className="text-lg md:text-2xl font-mono font-bold text-gray-900 dark:text-white">{currency}{pieData.totalSpent.toLocaleString()}</span>
+                  </div>
+                </>
+              )}
+            </div>
+            {isMobile && pieData.data.length > 0 && (
+              <p className="text-[10px] text-gray-400 dark:text-gray-500 text-center mt-2">Tap segments to view values</p>
+            )}
+          </div>
+
+        </div>
+      ) : (
+        <div className="animate-in fade-in duration-300">
+          <Forecaster />
+        </div>
+      )}
     </div>
   );
 }

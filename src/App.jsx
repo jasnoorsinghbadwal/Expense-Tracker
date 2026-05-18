@@ -13,6 +13,8 @@ import { Analytics } from './components/Analytics';
 import { Onboarding } from './components/Onboarding';
 import { AccountsPage } from './components/AccountsPage';
 import { ProfilePage } from './components/ProfilePage';
+import { Forecaster } from './components/Forecaster';
+import { SubscriptionsTracker } from './components/SubscriptionsTracker';
 import { SplashScreen } from './components/SplashScreen';
 import { LockScreen } from './components/LockScreen';
 import { Analytics as VercelAnalytics } from '@vercel/analytics/react';
@@ -88,8 +90,10 @@ function App() {
       case 'accounts': return <AccountsPage />;
       case 'transactions': return <TransactionsPage />;
       case 'budget': return <BudgetPlanner />;
+      case 'subscriptions': return <SubscriptionsTracker />;
       case 'goals': return <GoalsPage />;
       case 'analytics': return <Analytics />;
+      case 'forecaster': return <Forecaster />;
       case 'profile': return <ProfilePage />;
       default: return <Dashboard />;
     }
@@ -101,8 +105,10 @@ function App() {
       case 'accounts': return 'Accounts & Wallets';
       case 'transactions': return 'All Transactions';
       case 'budget': return 'Budget Planner';
+      case 'subscriptions': return 'Smart Subscriptions';
       case 'goals': return 'Savings Goals';
       case 'analytics': return 'Analytics & Reports';
+      case 'forecaster': return 'Cash Flow Forecaster';
       case 'profile': return 'Profile & Settings';
       default: return 'Dashboard';
     }
@@ -138,7 +144,7 @@ function App() {
       </main>
 
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-navy-900 border-t border-gray-200 dark:border-white/10 flex justify-around items-center p-2 pb-safe z-50 shadow-[0_-10px_20px_rgba(0,0,0,0.05)] dark:shadow-none transition-colors duration-300">
-        {TABS.filter(tab => tab.id !== 'profile').map(tab => {
+        {TABS.filter(tab => !['profile', 'forecaster', 'subscriptions'].includes(tab.id)).map(tab => {
           const Icon = tab.icon;
           const isActive = currentTab === tab.id;
           return (

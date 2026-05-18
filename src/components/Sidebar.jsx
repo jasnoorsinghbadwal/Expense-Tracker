@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, ReceiptText, PieChart, TrendingUp, Wallet, UserCircle, Target } from 'lucide-react';
+import { LayoutDashboard, ReceiptText, PieChart, TrendingUp, Wallet, UserCircle, Target, Compass, Sparkles } from 'lucide-react';
 
 export function Sidebar({ currentTab, setCurrentTab }) {
   const tabs = [
@@ -7,8 +7,10 @@ export function Sidebar({ currentTab, setCurrentTab }) {
     { id: 'accounts', label: 'Accounts', icon: Wallet },
     { id: 'transactions', label: 'Transactions', icon: ReceiptText },
     { id: 'budget', label: 'Budget Planner', icon: PieChart },
+    { id: 'subscriptions', label: 'Subscriptions', icon: Sparkles },
     { id: 'goals', label: 'Savings Goals', icon: Target },
     { id: 'analytics', label: 'Analytics', icon: TrendingUp },
+    { id: 'forecaster', label: 'Cash Forecaster', icon: Compass },
     { id: 'profile', label: 'Profile & Settings', icon: UserCircle },
   ];
 
