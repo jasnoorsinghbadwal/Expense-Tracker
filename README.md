@@ -1,6 +1,6 @@
 # Pay Trix - Premium Personal Finance Manager
 
-![Pay Trix Banner](https://via.placeholder.com/1200x400/1E1E1E/F5A623?text=Pay+Trix)
+![Pay Trix Banner](public/banner.png)
 
 **Pay Trix** is a state-of-the-art, privacy-first personal finance application built to help you take complete control of your wealth. Featuring a premium "dark-luxe" aesthetic, seamless wallet tracking, and intelligent analytics, Pay Trix operates entirely in your browser—meaning your financial data never leaves your device.
 
