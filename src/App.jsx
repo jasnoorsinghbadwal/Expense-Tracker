@@ -88,7 +88,7 @@ function App() {
       <Sidebar currentTab={currentTab} setCurrentTab={setCurrentTab} />
 
       <main className="flex-1 flex flex-col h-screen overflow-y-auto relative pb-24 md:pb-0">
-        <Header title={getTitle()} />
+        <Header title={getTitle()} currentTab={currentTab} />
         
         <div className="p-4 md:p-8 flex-1 max-w-7xl mx-auto w-full">
           {renderContent()}

@@ -124,8 +124,17 @@ export function BudgetPlanner() {
     setSelectedCat('');
   };
 
+  const formatLocalDate = (dateStr) => {
+    if (!dateStr) return 'Ongoing';
+    const d = parseLocalDate(dateStr);
+    if (isNaN(d.getTime())) return 'Ongoing';
+    return d.toLocaleDateString();
+  };
+
   const getFutureDaysLeft = (startDateStr) => {
+    if (!startDateStr) return 'Starts soon';
     const start = parseLocalDate(startDateStr);
+    if (isNaN(start.getTime())) return 'Starts soon';
     const diffTime = start.getTime() - today.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     if (diffDays === 1) return 'Starts tomorrow';
@@ -499,8 +508,8 @@ export function BudgetPlanner() {
                   </div>
 
                   <div className="mt-4 pt-3 border-t border-gray-200 dark:border-white/5 text-[10px] text-gray-400 dark:text-gray-500 flex items-center gap-1 justify-center">
-                    <Calendar size={12} /> Starts: {new Date(cat.startDate).toLocaleDateString()}
-                    {cat.endDate && ` - Ends: ${new Date(cat.endDate).toLocaleDateString()}`}
+                    <Calendar size={12} /> Starts: {formatLocalDate(cat.startDate)}
+                    {cat.endDate && ` - Ends: ${formatLocalDate(cat.endDate)}`}
                   </div>
                 </div>
               );
@@ -568,8 +577,8 @@ export function BudgetPlanner() {
                   </div>
 
                   <div className="text-[9px] text-gray-400 dark:text-gray-500 text-center mt-2 flex items-center justify-center gap-1">
-                    <Calendar size={10} /> Duration: {new Date(cat.startDate).toLocaleDateString()}
-                    {cat.endDate && ` - ${new Date(cat.endDate).toLocaleDateString()}`}
+                    <Calendar size={10} /> Duration: {formatLocalDate(cat.startDate)}
+                    {cat.endDate && ` - ${formatLocalDate(cat.endDate)}`}
                   </div>
                 </div>
               );
