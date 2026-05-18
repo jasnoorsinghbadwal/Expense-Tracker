@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useFinance } from '../context/FinanceContext';
-import { Target, AlertCircle, Plus, X, Trash2, Calendar, Award, History, Timer } from 'lucide-react';
+import { Target, AlertCircle, Plus, X, Trash2, Calendar, Award, History, Timer, ChevronDown } from 'lucide-react';
 import { CATEGORIES, getCategory } from '../utils/constants';
 import { getBudgetStatus, parseLocalDate, getPeriodDates } from '../utils/dateFilters';
 import { endOfMonth, endOfWeek } from 'date-fns';
@@ -17,6 +17,10 @@ export function BudgetPlanner() {
   const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
   const [endDate, setEndDate] = useState('');
   const [activeTab, setActiveTab] = useState('active'); // 'active', 'future', 'history'
+  const [savingsPeriod, setSavingsPeriod] = useState('all-time'); // savings banner timeline
+  const [savingsCustomStart, setSavingsCustomStart] = useState('');
+  const [savingsCustomEnd, setSavingsCustomEnd] = useState('');
+  const [showSavingsPicker, setShowSavingsPicker] = useState(false);
 
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -26,19 +30,27 @@ export function BudgetPlanner() {
   const customEndDate = state.settings.customEndDate;
   const { start: globalStart, end: globalEnd } = getPeriodDates(selectedPeriod, customStartDate, customEndDate);
 
-  // Compute lifetime savings across ended & dismissed budgets
-  const dismissedBudgetsSavings = useMemo(() => {
+  // Compute savings across dismissed budgets, filtered by the selected savings period
+  const { dismissedBudgetsSavings, savingsPeriodLabel } = useMemo(() => {
+    const { start: sStart, end: sEnd, label } = getPeriodDates(
+      savingsPeriod, savingsCustomStart, savingsCustomEnd
+    );
     let netSavings = 0;
     (state.budgets || []).forEach(b => {
-      if (b.dismissed) {
-        const status = getBudgetStatus(b, state.transactions);
-        if (status.hasEnded) {
-          netSavings += (b.amount - status.spent); // positive if saved, negative if exceeded
-        }
+      if (!b.dismissed) return;
+      const status = getBudgetStatus(b, state.transactions);
+      if (!status.hasEnded) return;
+      // Check if the budget's start date falls within the chosen savings period
+      const bStart = safeDate(b.startDate, FAR_PAST);
+      const bEnd   = safeDate(b.endDate,   FAR_FUTURE);
+      if (savingsPeriod === 'all-time') {
+        netSavings += (b.amount - status.spent);
+      } else if (bStart <= sEnd && bEnd >= sStart) {
+        netSavings += (b.amount - status.spent);
       }
     });
-    return netSavings;
-  }, [state.budgets, state.transactions]);
+    return { dismissedBudgetsSavings: netSavings, savingsPeriodLabel: label };
+  }, [state.budgets, state.transactions, savingsPeriod, savingsCustomStart, savingsCustomEnd]);
 
   // Compute all budgets with status and future flag
   const budgetsWithStatus = useMemo(() => {
@@ -173,17 +185,63 @@ export function BudgetPlanner() {
           )}
         </div>
 
-        {/* Dynamic Lifetime savings/exceeded metrics banner */}
-        <div className="glass p-5 rounded-2xl bg-gradient-to-tr from-navy-950 via-charcoal-900 to-navy-900 border border-gold-500/10 flex items-center justify-between group hover:-translate-y-0.5 transition-transform">
-          <div className="min-w-0">
-            <p className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Lifetime Budget Net Savings</p>
-            <h3 className={`text-2xl font-bold font-mono mt-1 truncate ${dismissedBudgetsSavings >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-              {dismissedBudgetsSavings >= 0 ? '+' : '-'}{currency}{Math.abs(dismissedBudgetsSavings).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-            </h3>
-            <p className="text-[9px] text-gray-500 mt-1 truncate">Updates dynamically when ended budgets are dismissed.</p>
+        {/* Dynamic savings/exceeded metrics banner — with timeline picker */}
+        <div className="glass p-5 rounded-2xl bg-gradient-to-tr from-navy-950 via-charcoal-900 to-navy-900 border border-gold-500/10 hover:-translate-y-0.5 transition-transform relative">
+          {/* Timeline pill selector */}
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Budget Net Savings</p>
+            <div className="relative">
+              <button
+                onClick={() => setShowSavingsPicker(v => !v)}
+                className="flex items-center gap-1 text-[10px] font-semibold text-gold-400 bg-gold-500/10 hover:bg-gold-500/20 border border-gold-500/20 px-2 py-1 rounded-lg transition-colors"
+              >
+                {savingsPeriod === 'all-time' ? 'All Time'
+                  : savingsPeriod === 'this-month' ? 'This Month'
+                  : savingsPeriod === 'last-month' ? 'Last Month'
+                  : savingsPeriod === 'this-week' ? 'This Week'
+                  : 'Custom'}
+                <ChevronDown size={10} />
+              </button>
+              {showSavingsPicker && (
+                <div className="absolute right-0 top-full mt-1 z-30 bg-white dark:bg-charcoal-800 border border-gray-200 dark:border-white/10 rounded-xl shadow-xl overflow-hidden min-w-[140px] animate-in fade-in zoom-in-95 duration-150">
+                  {[['all-time','All Time'],['this-month','This Month'],['last-month','Last Month'],['this-week','This Week'],['custom','Custom Range']].map(([val, lbl]) => (
+                    <button
+                      key={val}
+                      onClick={() => { setSavingsPeriod(val); if (val !== 'custom') setShowSavingsPicker(false); }}
+                      className={`w-full text-left px-4 py-2.5 text-xs font-medium transition-colors ${
+                        savingsPeriod === val
+                          ? 'bg-gold-500/15 text-gold-500'
+                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5'
+                      }`}
+                    >{lbl}</button>
+                  ))}
+                  {savingsPeriod === 'custom' && (
+                    <div className="px-3 pb-3 space-y-2 border-t border-gray-100 dark:border-white/5 pt-2">
+                      <input type="date" value={savingsCustomStart} onChange={e => setSavingsCustomStart(e.target.value)}
+                        className="w-full bg-gray-50 dark:bg-charcoal-900 border border-gray-200 dark:border-white/10 rounded-lg py-1.5 px-2 text-[10px] text-gray-700 dark:text-gray-300 outline-none focus:border-gold-500/50" />
+                      <input type="date" value={savingsCustomEnd} onChange={e => { setSavingsCustomEnd(e.target.value); setShowSavingsPicker(false); }}
+                        className="w-full bg-gray-50 dark:bg-charcoal-900 border border-gray-200 dark:border-white/10 rounded-lg py-1.5 px-2 text-[10px] text-gray-700 dark:text-gray-300 outline-none focus:border-gold-500/50" />
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
-          <div className={`p-3 rounded-xl shrink-0 ${dismissedBudgetsSavings >= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
-            <Award size={24} />
+
+          <div className="flex items-end justify-between">
+            <div className="min-w-0">
+              <h3 className={`text-2xl font-bold font-mono truncate ${
+                dismissedBudgetsSavings >= 0 ? 'text-emerald-500' : 'text-rose-500'
+              }`}>
+                {dismissedBudgetsSavings >= 0 ? '+' : '-'}{currency}{Math.abs(dismissedBudgetsSavings).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+              </h3>
+              <p className="text-[9px] text-gray-500 mt-1 truncate">{savingsPeriodLabel}</p>
+            </div>
+            <div className={`p-3 rounded-xl shrink-0 ${
+              dismissedBudgetsSavings >= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'
+            }`}>
+              <Award size={24} />
+            </div>
           </div>
         </div>
       </div>
