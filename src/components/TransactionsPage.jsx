@@ -10,6 +10,7 @@ export function TransactionsPage() {
   const { state, dispatch } = useFinance();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
+  const [filterAccountType, setFilterAccountType] = useState('all');
   const [editModalData, setEditModalData] = useState(null);
   const currency = state.settings.currency;
 
@@ -24,7 +25,12 @@ export function TransactionsPage() {
     const matchesSearch = t.title.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = filterType === 'all' || t.type === filterType;
     const matchesPeriod = isTransactionInPeriod(t.date, state.settings.selectedPeriod, state.settings.customStartDate, state.settings.customEndDate);
-    return matchesSearch && matchesType && matchesPeriod;
+    
+    // Account Type matching
+    const acc = state.accounts?.find(a => a.id === t.accountId);
+    const matchesAccountType = filterAccountType === 'all' || (acc && acc.type === filterAccountType);
+
+    return matchesSearch && matchesType && matchesPeriod && matchesAccountType;
   });
 
   const exportToCSV = () => {
@@ -58,8 +64,8 @@ export function TransactionsPage() {
 
   return (
     <div className="space-y-4 md:space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 sm:h-full flex flex-col pb-4">
-      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-between items-center glass p-3 md:p-4 rounded-2xl shrink-0">
-        <div className="relative w-full sm:w-96">
+      <div className="flex flex-col xl:flex-row gap-3 sm:gap-4 justify-between items-center glass p-3 md:p-4 rounded-2xl shrink-0">
+        <div className="relative w-full xl:w-96">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
           <input 
             type="text" 
@@ -69,18 +75,32 @@ export function TransactionsPage() {
             className="w-full bg-gray-50 dark:bg-charcoal-900 border border-gray-200 dark:border-white/10 rounded-xl py-2 md:py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:border-gold-500/50 focus:ring-1 focus:ring-gold-500/50 transition-all text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-600"
           />
         </div>
-        <div className="flex items-center w-full sm:w-auto gap-2">
-          <div className="flex items-center w-full sm:w-auto bg-gray-100 dark:bg-charcoal-900 border border-gray-200 dark:border-white/10 rounded-xl p-1">
-            <button onClick={() => setFilterType('all')} className={`flex-1 sm:flex-none px-4 py-1.5 text-sm font-medium rounded-lg transition-all ${filterType === 'all' ? 'bg-white dark:bg-white/10 text-gray-900 dark:text-white shadow-sm dark:shadow-none' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}>All</button>
-            <button onClick={() => setFilterType('income')} className={`flex-1 sm:flex-none px-4 py-1.5 text-sm font-medium rounded-lg transition-all ${filterType === 'income' ? 'bg-white dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 shadow-sm dark:shadow-none' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}>Income</button>
-            <button onClick={() => setFilterType('expense')} className={`flex-1 sm:flex-none px-4 py-1.5 text-sm font-medium rounded-lg transition-all ${filterType === 'expense' ? 'bg-white dark:bg-rose-500/20 text-rose-600 dark:text-rose-400 shadow-sm dark:shadow-none' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}>Expense</button>
+        <div className="flex flex-wrap items-center justify-end w-full xl:w-auto gap-2 md:gap-3">
+          {/* Transaction Type Filter */}
+          <div className="flex items-center bg-gray-100 dark:bg-charcoal-900 border border-gray-200 dark:border-white/10 rounded-xl p-1 shrink-0">
+            <button onClick={() => setFilterType('all')} className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all ${filterType === 'all' ? 'bg-white dark:bg-white/10 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>All</button>
+            <button onClick={() => setFilterType('income')} className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all ${filterType === 'income' ? 'bg-white dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 shadow-sm' : 'text-gray-500 hover:text-emerald-500'}`}>Income</button>
+            <button onClick={() => setFilterType('expense')} className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all ${filterType === 'expense' ? 'bg-white dark:bg-rose-500/20 text-rose-600 dark:text-rose-400 shadow-sm' : 'text-gray-500 hover:text-rose-500'}`}>Expense</button>
           </div>
+
+          {/* Account Type Filter */}
+          <select 
+            value={filterAccountType}
+            onChange={(e) => setFilterAccountType(e.target.value)}
+            className="bg-gray-150 dark:bg-charcoal-900 border border-gray-200 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs font-semibold outline-none focus:border-gold-500/50 cursor-pointer text-gray-800 dark:text-white"
+          >
+            <option value="all">All Account Types</option>
+            <option value="bank">🏦 Bank</option>
+            <option value="cash">💵 Cash</option>
+            <option value="credit">💳 Credit Card</option>
+          </select>
+
           <button 
             onClick={exportToCSV} 
-            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-gold-500/10 text-gold-600 dark:text-gold-400 rounded-lg hover:bg-gold-500/20 transition-colors border border-gold-500/20 shrink-0" 
+            className="hidden sm:flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold bg-gold-500/10 text-gold-600 dark:text-gold-400 rounded-xl hover:bg-gold-500/20 transition-colors border border-gold-500/20 shrink-0" 
             title="Export to CSV"
           >
-            <Download size={16} /> Export
+            <Download size={14} /> Export
           </button>
         </div>
       </div>
