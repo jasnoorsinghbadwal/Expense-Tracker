@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 
 import { PeriodSelector } from './PeriodSelector';
 
-export function Header({ title, currentTab }) {
+export function Header({ title, currentTab, setCurrentTab }) {
   const { state, dispatch } = useFinance();
   const userName = state.settings.userName || 'User';
   const firstName = userName.split(' ')[0];
@@ -75,15 +75,18 @@ export function Header({ title, currentTab }) {
           {state.settings.theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
         </button>
         
-        <div className="flex items-center gap-3 pl-3 md:pl-5 border-l border-gray-200 dark:border-white/10">
+        <button 
+          onClick={() => setCurrentTab('profile')}
+          className="flex items-center gap-3 pl-3 md:pl-5 border-l border-gray-200 dark:border-white/10 hover:opacity-80 active:scale-95 transition-all text-left outline-none cursor-pointer group"
+        >
            <div className="text-right hidden sm:block">
-             <p className="text-sm font-medium text-gray-900 dark:text-white">{firstName}</p>
-             <p className="text-xs text-gray-500 dark:text-gray-400">Premium Plan</p>
+             <p className="text-sm font-medium text-gray-900 dark:text-white group-hover:text-gold-500 dark:group-hover:text-gold-400 transition-colors">{firstName}</p>
+             <p className="text-[10px] text-gold-600 dark:text-gold-400 font-bold uppercase tracking-wider">Settings</p>
            </div>
-           <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-gold-500 to-amber-300 flex items-center justify-center text-navy-900 font-bold shadow-lg shadow-gold-500/20 text-sm">
+           <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-gold-500 to-amber-300 flex items-center justify-center text-navy-900 font-bold shadow-lg shadow-gold-500/20 text-sm group-hover:scale-105 transition-transform">
              {initials}
            </div>
-        </div>
+        </button>
       </div>
     </header>
   );

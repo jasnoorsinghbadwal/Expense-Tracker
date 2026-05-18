@@ -116,7 +116,7 @@ function App() {
       <Sidebar currentTab={currentTab} setCurrentTab={setCurrentTab} />
 
       <main className="flex-1 flex flex-col h-screen overflow-y-auto relative pb-24 md:pb-0">
-        <Header title={getTitle()} currentTab={currentTab} />
+        <Header title={getTitle()} currentTab={currentTab} setCurrentTab={setCurrentTab} />
         
         <div className="p-4 md:p-8 flex-1 max-w-7xl mx-auto w-full">
           {renderContent()}
@@ -131,7 +131,7 @@ function App() {
       </main>
 
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-navy-900 border-t border-gray-200 dark:border-white/10 flex justify-around items-center p-2 pb-safe z-50 shadow-[0_-10px_20px_rgba(0,0,0,0.05)] dark:shadow-none transition-colors duration-300">
-        {TABS.map(tab => {
+        {TABS.filter(tab => tab.id !== 'profile').map(tab => {
           const Icon = tab.icon;
           const isActive = currentTab === tab.id;
           return (

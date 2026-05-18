@@ -115,93 +115,98 @@ export function Dashboard() {
 
       <CoachInsights />
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 md:gap-8">
-         <div className="xl:col-span-2 space-y-6 md:space-y-8">
-            <div className="glass p-5 md:p-6 rounded-2xl h-[350px] md:h-[400px] flex flex-col relative overflow-hidden">
-               <div className="flex justify-between items-center mb-6">
-                 <h3 className="text-lg font-semibold tracking-wide text-gray-900 dark:text-white">Spending Trend ({periodLabel})</h3>
-                 <select 
-                   value={timeRange}
-                   onChange={(e) => setTimeRange(Number(e.target.value))}
-                   className="bg-gray-100 dark:bg-charcoal-800 border border-gray-200 dark:border-white/10 rounded-lg px-2 md:px-3 py-1.5 text-xs md:text-sm outline-none focus:border-gold-500/50 transition-colors cursor-pointer text-gray-800 dark:text-white"
-                 >
-                   <option value={7}>Last 7 Days</option>
-                   <option value={30}>Last 30 Days</option>
-                 </select>
+      <div className="space-y-6 md:space-y-8">
+        {/* Spending Trend */}
+        <div className="glass p-5 md:p-6 rounded-2xl h-[350px] md:h-[400px] flex flex-col relative overflow-hidden">
+           <div className="flex justify-between items-center mb-6">
+             <h3 className="text-lg font-semibold tracking-wide text-gray-900 dark:text-white">Spending Trend ({periodLabel})</h3>
+             <select 
+               value={timeRange}
+               onChange={(e) => setTimeRange(Number(e.target.value))}
+               className="bg-gray-100 dark:bg-charcoal-800 border border-gray-200 dark:border-white/10 rounded-lg px-2 md:px-3 py-1.5 text-xs md:text-sm outline-none focus:border-gold-500/50 transition-colors cursor-pointer text-gray-800 dark:text-white"
+             >
+               <option value={7}>Last 7 Days</option>
+               <option value={30}>Last 30 Days</option>
+             </select>
+           </div>
+           <div className="flex-1 w-full relative">
+             {periodTransactions.length === 0 ? (
+               <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-500">
+                 <p>No data available in this period</p>
+                 <p className="text-xs mt-1">Add transactions to see your trends.</p>
                </div>
-               <div className="flex-1 w-full relative">
-                 {periodTransactions.length === 0 ? (
-                   <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-500">
-                     <p>No data available in this period</p>
-                     <p className="text-xs mt-1">Add transactions to see your trends.</p>
-                   </div>
-                 ) : (
-                   <ResponsiveContainer width="100%" height="100%">
-                     <AreaChart data={chartData}>
-                       <defs>
-                         <linearGradient id="colorSpend" x1="0" y1="0" x2="0" y2="1">
-                           <stop offset="5%" stopColor="#F5A623" stopOpacity={0.3}/>
-                           <stop offset="95%" stopColor="#F5A623" stopOpacity={0}/>
-                         </linearGradient>
-                       </defs>
-                       <Tooltip 
-                         contentStyle={{ backgroundColor: isDark ? '#121212' : '#ffffff', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)', borderRadius: '12px', color: isDark ? '#fff' : '#000' }}
-                         itemStyle={{ color: '#F5A623', fontFamily: 'JetBrains Mono' }}
-                         formatter={(value) => [`${currency}${value}`, 'Spent']}
-                       />
-                       <Area type="monotone" dataKey="spend" stroke="#F5A623" strokeWidth={3} fillOpacity={1} fill="url(#colorSpend)" />
-                     </AreaChart>
-                   </ResponsiveContainer>
-                 )}
-               </div>
-            </div>
-         </div>
+             ) : (
+               <ResponsiveContainer width="100%" height="100%">
+                 <AreaChart data={chartData}>
+                   <defs>
+                     <linearGradient id="colorSpend" x1="0" y1="0" x2="0" y2="1">
+                       <stop offset="5%" stopColor="#F5A623" stopOpacity={0.3}/>
+                       <stop offset="95%" stopColor="#F5A623" stopOpacity={0}/>
+                     </linearGradient>
+                   </defs>
+                   <Tooltip 
+                     contentStyle={{ backgroundColor: isDark ? '#121212' : '#ffffff', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)', borderRadius: '12px', color: isDark ? '#fff' : '#000' }}
+                     itemStyle={{ color: '#F5A623', fontFamily: 'JetBrains Mono' }}
+                     formatter={(value) => [`${currency}${value}`, 'Spent']}
+                   />
+                   <Area type="monotone" dataKey="spend" stroke="#F5A623" strokeWidth={3} fillOpacity={1} fill="url(#colorSpend)" />
+                 </AreaChart>
+               </ResponsiveContainer>
+             )}
+           </div>
+        </div>
 
-         <div className="space-y-6 md:space-y-8">
-            <div className="glass p-5 md:p-6 rounded-2xl flex flex-col h-[350px] md:h-[400px]">
-               <div className="flex justify-between items-center mb-4 md:mb-6">
-                 <h3 className="text-lg font-semibold tracking-wide text-gray-900 dark:text-white">Recent ({periodLabel})</h3>
-               </div>
-               <div className="flex-1 overflow-y-auto pr-2 space-y-3 custom-scrollbar">
-                  {recentTransactions.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-full text-gray-500 text-center">
-                      <div className="w-12 h-12 bg-gray-100 dark:bg-white/5 rounded-full flex items-center justify-center mb-3">
-                        <Plus size={20} className="text-gray-400" />
-                      </div>
-                      <p className="font-medium text-gray-900 dark:text-white mb-1">No transactions in this period</p>
-                      <p className="text-xs">Click the + button below to get started.</p>
+        {/* Recent Transactions */}
+        <div className="glass p-5 md:p-6 rounded-2xl flex flex-col">
+           <div className="flex justify-between items-center mb-6">
+             <h3 className="text-lg font-semibold tracking-wide text-gray-900 dark:text-white">Recent Transactions ({periodLabel})</h3>
+           </div>
+           <div className="space-y-3">
+              {recentTransactions.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-10 text-gray-500 text-center">
+                  <div className="w-12 h-12 bg-gray-100 dark:bg-white/5 rounded-full flex items-center justify-center mb-3">
+                    <Plus size={20} className="text-gray-400" />
+                  </div>
+                  <p className="font-medium text-gray-900 dark:text-white mb-1">No transactions in this period</p>
+                  <p className="text-xs">Click the + button below to get started.</p>
+                </div>
+              ) : (
+                recentTransactions.map(t => {
+                  const cat = getCategory(t.category);
+                  const Icon = cat.icon;
+                  const acc = state.accounts?.find(a => a.id === t.accountId);
+                  const accName = acc ? acc.name : 'Unknown Wallet';
+                  return (
+                    <div key={t.id} className="flex items-center justify-between p-3.5 rounded-xl bg-gray-50 dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors cursor-pointer group">
+                       <div className="flex items-center gap-3 md:gap-4 min-w-0">
+                          <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg shrink-0 bg-white dark:bg-charcoal-800 shadow-sm dark:shadow-none" style={{ color: cat.color }}>
+                             <Icon size={18} />
+                          </div>
+                          <div className="min-w-0">
+                             <p className="font-medium text-gray-900 dark:text-white group-hover:text-gold-500 dark:group-hover:text-gold-400 transition-colors truncate">{t.title}</p>
+                             <p className="text-xs text-gray-500 dark:text-gray-400 truncate flex items-center gap-1.5">
+                               <span>{t.date}</span>
+                               <span className="text-gray-300 dark:text-gray-600">·</span>
+                               <span className="text-[10px] bg-gold-500/10 dark:bg-gold-500/20 text-gold-600 dark:text-gold-400 px-1 py-0.2 rounded font-semibold">{accName}</span>
+                             </p>
+                          </div>
+                       </div>
+                       <span className={`font-mono font-medium shrink-0 ml-2 ${t.type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-900 dark:text-white'}`}>
+                         {t.type === 'income' ? '+' : '-'}{currency}{t.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                       </span>
                     </div>
-                  ) : (
-                    recentTransactions.map(t => {
-                      const cat = getCategory(t.category);
-                      const Icon = cat.icon;
-                      const acc = state.accounts?.find(a => a.id === t.accountId);
-                      const accName = acc ? acc.name : 'Unknown Wallet';
-                      return (
-                        <div key={t.id} className="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors cursor-pointer group">
-                           <div className="flex items-center gap-3 md:gap-4">
-                              <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg shrink-0 bg-white dark:bg-charcoal-800 shadow-sm dark:shadow-none" style={{ color: cat.color }}>
-                                 <Icon size={18} />
-                              </div>
-                              <div className="min-w-0">
-                                 <p className="font-medium text-gray-900 dark:text-white group-hover:text-gold-500 dark:group-hover:text-gold-400 transition-colors truncate">{t.title}</p>
-                                 <p className="text-xs text-gray-500 dark:text-gray-400 truncate flex items-center gap-1.5">
-                                   <span>{t.date}</span>
-                                   <span className="text-gray-300 dark:text-gray-600">·</span>
-                                   <span className="text-[10px] bg-gold-500/10 dark:bg-gold-500/20 text-gold-600 dark:text-gold-400 px-1 py-0.2 rounded font-semibold">{accName}</span>
-                                 </p>
-                              </div>
-                           </div>
-                           <span className={`font-mono font-medium shrink-0 ml-2 ${t.type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-900 dark:text-white'}`}>
-                             {t.type === 'income' ? '+' : '-'}{currency}{t.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                           </span>
-                        </div>
-                      );
-                    })
-                  )}
-               </div>
-            </div>
-         </div>
+                  );
+                })
+              )}
+           </div>
+        </div>
+      </div>
+
+      {/* Profile Hint Footer */}
+      <div className="text-center pt-8 pb-4">
+        <p className="text-xs text-gray-400 dark:text-gray-500 font-medium">
+          💡 For Settings & App Customization, click on your Profile Icon in the header.
+        </p>
       </div>
     </div>
   );

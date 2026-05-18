@@ -29,6 +29,20 @@ export function GoalsPage() {
   const goals = state.goals || [];
   const accounts = state.accounts || [];
 
+  const getAccountBalance = (accountId) => {
+    const account = accounts.find(a => a.id === accountId);
+    if (!account) return 0;
+    
+    let balance = account.initialBalance;
+    state.transactions.forEach(t => {
+      if (t.accountId === accountId) {
+        if (t.type === 'income') balance += t.amount;
+        else balance -= t.amount;
+      }
+    });
+    return balance;
+  };
+
   // Consolidated Savings Status
   const { totalTarget, totalCurrent, overallProgress } = useMemo(() => {
     let target = 0;
@@ -311,7 +325,7 @@ export function GoalsPage() {
                   >
                     <option value="">Select Account...</option>
                     {accounts.map(a => (
-                      <option key={a.id} value={a.id}>{a.name} ({currency}{a.initialBalance})</option>
+                      <option key={a.id} value={a.id}>{a.name} ({currency}{getAccountBalance(a.id).toLocaleString(undefined, { minimumFractionDigits: 2 })})</option>
                     ))}
                   </select>
                 </div>
@@ -556,7 +570,7 @@ export function GoalsPage() {
                 >
                   <option value="" disabled>Select Wallet Account...</option>
                   {accounts.map(a => (
-                    <option key={a.id} value={a.id}>{a.name} ({currency}{a.initialBalance})</option>
+                    <option key={a.id} value={a.id}>{a.name} ({currency}{getAccountBalance(a.id).toLocaleString(undefined, { minimumFractionDigits: 2 })})</option>
                   ))}
                 </select>
               </div>
