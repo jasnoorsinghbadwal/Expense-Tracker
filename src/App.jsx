@@ -145,6 +145,10 @@ function App() {
             <button 
               key={tab.id}
               onClick={() => handleTabChange(tab.id)}
+              onTouchStart={(e) => {
+                e.preventDefault();
+                handleTabChange(tab.id);
+              }}
               className={`flex flex-col items-center p-2 rounded-xl transition-all ${isActive ? 'text-gold-500' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'}`}
             >
               <Icon size={24} strokeWidth={isActive ? 2.5 : 2} className={isActive ? 'drop-shadow-md' : ''} />
