@@ -4,6 +4,7 @@ import { ArrowUpRight, ArrowDownRight, Wallet, Plus } from 'lucide-react';
 import { AreaChart, Area, ResponsiveContainer, Tooltip } from 'recharts';
 import { getCategory } from '../utils/constants';
 import { isTransactionInPeriod, getPeriodDates } from '../utils/dateFilters';
+import { CoachInsights } from './CoachInsights';
 
 export function Dashboard() {
   const { state } = useFinance();
@@ -111,6 +112,8 @@ export function Dashboard() {
           <h3 className="text-2xl md:text-3xl font-mono font-semibold text-rose-600 dark:text-rose-400 tracking-tight">{currency}{expensesInPeriod.toLocaleString(undefined, { minimumFractionDigits: 2 })}</h3>
         </div>
       </div>
+
+      <CoachInsights />
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 md:gap-8">
          <div className="xl:col-span-2 space-y-6 md:space-y-8">

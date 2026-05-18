@@ -6,6 +6,7 @@ const initialState = {
   transactions: [],
   budgets: [], // Array of { id, category, amount, accountId, period, startDate, endDate, dismissed }
   accounts: [], // { id, name, type, initialBalance }
+  goals: [], // Array of { id, name, targetAmount, currentAmount, category, color, deadline, history: [] }
   settings: {
     theme: 'dark',
     currency: '₹',
@@ -70,6 +71,49 @@ function financeReducer(state, action) {
       return { ...state, accounts: (state.accounts || []).map(a => a.id === action.payload.id ? action.payload : a) };
     case 'DELETE_ACCOUNT':
       return { ...state, accounts: (state.accounts || []).filter(a => a.id !== action.payload) };
+    
+    // Goals Reducer Actions
+    case 'ADD_GOAL':
+      return { ...state, goals: [...(state.goals || []), action.payload] };
+    case 'EDIT_GOAL':
+      return { ...state, goals: (state.goals || []).map(g => g.id === action.payload.id ? action.payload : g) };
+    case 'DELETE_GOAL':
+      return { ...state, goals: (state.goals || []).filter(g => g.id !== action.payload) };
+    case 'CONTRIBUTE_TO_GOAL':
+      return {
+        ...state,
+        goals: (state.goals || []).map(g => {
+          if (g.id === action.payload.goalId) {
+            return {
+              ...g,
+              currentAmount: g.currentAmount + action.payload.amount,
+              history: [
+                ...(g.history || []),
+                { id: `log-${Date.now()}`, type: 'contribution', amount: action.payload.amount, date: action.payload.date }
+              ]
+            };
+          }
+          return g;
+        })
+      };
+    case 'WITHDRAW_FROM_GOAL':
+      return {
+        ...state,
+        goals: (state.goals || []).map(g => {
+          if (g.id === action.payload.goalId) {
+            return {
+              ...g,
+              currentAmount: Math.max(0, g.currentAmount - action.payload.amount),
+              history: [
+                ...(g.history || []),
+                { id: `log-${Date.now()}`, type: 'withdrawal', amount: action.payload.amount, date: action.payload.date }
+              ]
+            };
+          }
+          return g;
+        })
+      };
+
     case 'UPDATE_PROFILE':
       return { 
         ...state, 
@@ -124,6 +168,7 @@ function financeReducer(state, action) {
         ...action.payload,
         budgets: parsedBudgets,
         accounts: action.payload.accounts || [],
+        goals: action.payload.goals || [],
         settings: {
           ...initialState.settings,
           ...(action.payload.settings || {})

@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useFinance } from './context/FinanceContext';
 import { Toaster } from 'react-hot-toast';
-import { Plus, LayoutDashboard, ReceiptText, PieChart, TrendingUp, Wallet, UserCircle } from 'lucide-react';
+import { Plus, LayoutDashboard, ReceiptText, PieChart, TrendingUp, Wallet, UserCircle, Target } from 'lucide-react';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import { Dashboard } from './components/Dashboard';
 import { TransactionModal } from './components/TransactionModal';
 import { TransactionsPage } from './components/TransactionsPage';
 import { BudgetPlanner } from './components/BudgetPlanner';
+import { GoalsPage } from './components/GoalsPage';
 import { Analytics } from './components/Analytics';
 import { Onboarding } from './components/Onboarding';
 import { AccountsPage } from './components/AccountsPage';
@@ -80,6 +81,7 @@ function App() {
       case 'accounts': return <AccountsPage />;
       case 'transactions': return <TransactionsPage />;
       case 'budget': return <BudgetPlanner />;
+      case 'goals': return <GoalsPage />;
       case 'analytics': return <Analytics />;
       case 'profile': return <ProfilePage />;
       default: return <Dashboard />;
@@ -92,6 +94,7 @@ function App() {
       case 'accounts': return 'Accounts & Wallets';
       case 'transactions': return 'All Transactions';
       case 'budget': return 'Budget Planner';
+      case 'goals': return 'Savings Goals';
       case 'analytics': return 'Analytics & Reports';
       case 'profile': return 'Profile & Settings';
       default: return 'Dashboard';
@@ -103,6 +106,7 @@ function App() {
     { id: 'accounts', label: 'Wallets', icon: Wallet },
     { id: 'transactions', label: 'Txns', icon: ReceiptText },
     { id: 'budget', label: 'Budget', icon: PieChart },
+    { id: 'goals', label: 'Goals', icon: Target },
     { id: 'analytics', label: 'Stats', icon: TrendingUp },
     { id: 'profile', label: 'Profile', icon: UserCircle },
   ];
