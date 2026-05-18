@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useTransition } from 'react';
 import { useFinance } from './context/FinanceContext';
 import { Toaster } from 'react-hot-toast';
 import { Plus, LayoutDashboard, ReceiptText, PieChart, TrendingUp, Wallet, UserCircle, Target } from 'lucide-react';
@@ -20,7 +20,14 @@ import { Analytics as VercelAnalytics } from '@vercel/analytics/react';
 function App() {
   const { state } = useFinance();
   const [currentTab, setCurrentTab] = useState('dashboard');
+  const [isPending, startTransition] = useTransition();
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleTabChange = useCallback((tabId) => {
+    startTransition(() => {
+      setCurrentTab(tabId);
+    });
+  }, []);
 
   // Show splash only once per browser session
   const [showSplash, setShowSplash] = useState(() => {
@@ -113,10 +120,10 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-navy-900 text-gray-900 dark:text-white flex overflow-hidden transition-colors duration-300">
-      <Sidebar currentTab={currentTab} setCurrentTab={setCurrentTab} />
+      <Sidebar currentTab={currentTab} setCurrentTab={handleTabChange} />
 
-      <main className="flex-1 flex flex-col h-screen overflow-y-auto relative pb-24 md:pb-0">
-        <Header title={getTitle()} currentTab={currentTab} setCurrentTab={setCurrentTab} />
+      <main className={`flex-1 flex flex-col h-screen overflow-y-auto relative pb-24 md:pb-0 transition-opacity duration-200 ${isPending ? 'opacity-70' : 'opacity-100'}`}>
+        <Header title={getTitle()} currentTab={currentTab} setCurrentTab={handleTabChange} />
         
         <div className="p-4 md:p-8 flex-1 max-w-7xl mx-auto w-full">
           {renderContent()}
@@ -137,7 +144,7 @@ function App() {
           return (
             <button 
               key={tab.id}
-              onClick={() => setCurrentTab(tab.id)}
+              onClick={() => handleTabChange(tab.id)}
               className={`flex flex-col items-center p-2 rounded-xl transition-all ${isActive ? 'text-gold-500' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'}`}
             >
               <Icon size={24} strokeWidth={isActive ? 2.5 : 2} className={isActive ? 'drop-shadow-md' : ''} />
