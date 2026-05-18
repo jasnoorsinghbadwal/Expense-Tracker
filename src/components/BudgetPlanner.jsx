@@ -60,15 +60,26 @@ export function BudgetPlanner() {
     });
   }, [state.budgets, state.transactions, today]);
 
+  // Safe date comparison helper – returns a valid Date or a fallback
+  const safeDate = (dateStr, fallback) => {
+    if (!dateStr) return fallback;
+    const d = parseLocalDate(dateStr);
+    return isNaN(d.getTime()) ? fallback : d;
+  };
+
+  // The far future / far past sentinels for open-ended budgets
+  const FAR_FUTURE = new Date(2999, 11, 31);
+  const FAR_PAST   = new Date(0);
+
   // Split into tabs and respect global period filtering (for Active and History)
   const activeBudgets = useMemo(() => {
     return budgetsWithStatus.filter(b => {
       if (b.dismissed || b.isFuture) return false;
-      
-      // Filter active budgets overlapping with selected period
+      // Ongoing budgets are always active
       if (b.period === 'ongoing') return true;
-      const bStart = new Date(b.startDate);
-      const bEnd = new Date(b.endDate);
+      // Use status dates computed by getBudgetStatus (already uses parseLocalDate)
+      const bStart = b.startDate ? safeDate(b.startDate, FAR_PAST)   : FAR_PAST;
+      const bEnd   = b.endDate   ? safeDate(b.endDate,   FAR_FUTURE) : FAR_FUTURE;
       return bStart <= globalEnd && bEnd >= globalStart;
     });
   }, [budgetsWithStatus, globalStart, globalEnd]);
@@ -81,11 +92,10 @@ export function BudgetPlanner() {
   const historyBudgets = useMemo(() => {
     return budgetsWithStatus.filter(b => {
       if (!b.dismissed) return false;
-      
-      // Filter dismissed/past records by the global period
+      // Ongoing dismissed budgets always appear in history
       if (b.period === 'ongoing') return true;
-      const bStart = new Date(b.startDate);
-      const bEnd = new Date(b.endDate);
+      const bStart = b.startDate ? safeDate(b.startDate, FAR_PAST)   : FAR_PAST;
+      const bEnd   = b.endDate   ? safeDate(b.endDate,   FAR_FUTURE) : FAR_FUTURE;
       return bStart <= globalEnd && bEnd >= globalStart;
     });
   }, [budgetsWithStatus, globalStart, globalEnd]);

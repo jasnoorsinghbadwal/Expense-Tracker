@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useFinance } from './context/FinanceContext';
 import { Toaster } from 'react-hot-toast';
 import { Plus, LayoutDashboard, ReceiptText, PieChart, TrendingUp, Wallet, UserCircle } from 'lucide-react';
@@ -12,12 +12,23 @@ import { Analytics } from './components/Analytics';
 import { Onboarding } from './components/Onboarding';
 import { AccountsPage } from './components/AccountsPage';
 import { ProfilePage } from './components/ProfilePage';
+import { SplashScreen } from './components/SplashScreen';
 import { Analytics as VercelAnalytics } from '@vercel/analytics/react';
 
 function App() {
   const { state } = useFinance();
   const [currentTab, setCurrentTab] = useState('dashboard');
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Show splash only once per browser session
+  const [showSplash, setShowSplash] = useState(() => {
+    return !sessionStorage.getItem('paytrix_splash_shown');
+  });
+
+  const handleSplashDone = useCallback(() => {
+    sessionStorage.setItem('paytrix_splash_shown', '1');
+    setShowSplash(false);
+  }, []);
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -34,6 +45,11 @@ function App() {
       setCurrentTab('dashboard');
     }
   }, [state.settings.isSetup]);
+
+  // Show splash screen on initial load (over onboarding or main app)
+  if (showSplash) {
+    return <SplashScreen onDone={handleSplashDone} />;
+  }
 
   if (!state.settings.isSetup) {
     return (
