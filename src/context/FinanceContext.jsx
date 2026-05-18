@@ -41,8 +41,47 @@ function financeReducer(state, action) {
         ...state, 
         transactions: state.transactions.map(t => t.id === action.payload.id ? action.payload : t) 
       };
-    case 'DELETE_TRANSACTION':
-      return { ...state, transactions: state.transactions.filter(t => t.id !== action.payload) };
+    case 'DELETE_TRANSACTION': {
+      const deletedTxnId = action.payload;
+      const targetTxn = state.transactions.find(t => t.id === deletedTxnId);
+      let updatedSubs = state.subscriptions || [];
+
+      if (targetTxn && targetTxn.subscriptionId) {
+        updatedSubs = updatedSubs.map(sub => {
+          if (sub.id === targetTxn.subscriptionId) {
+            const currentBillingDate = new Date(sub.nextBillingDate);
+            if (sub.billingCycle === 'monthly') {
+              currentBillingDate.setMonth(currentBillingDate.getMonth() - 1);
+            } else {
+              currentBillingDate.setFullYear(currentBillingDate.getFullYear() - 1);
+            }
+            const rolledBackDate = currentBillingDate.toISOString().split('T')[0];
+
+            const remainingTxns = state.transactions
+              .filter(t => t.id !== deletedTxnId && t.subscriptionId === sub.id)
+              .sort((a, b) => b.date.localeCompare(a.date));
+            
+            let newPaidUntil = '';
+            if (remainingTxns.length > 0) {
+              newPaidUntil = remainingTxns[0].date;
+            }
+
+            return {
+              ...sub,
+              nextBillingDate: rolledBackDate,
+              paidUntil: newPaidUntil
+            };
+          }
+          return sub;
+        });
+      }
+
+      return { 
+        ...state, 
+        transactions: state.transactions.filter(t => t.id !== deletedTxnId),
+        subscriptions: updatedSubs
+      };
+    }
     
     // Modernized Budget Actions
     case 'ADD_BUDGET':

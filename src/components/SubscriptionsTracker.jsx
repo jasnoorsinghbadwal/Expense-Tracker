@@ -126,6 +126,7 @@ export function SubscriptionsTracker() {
     const transactionId = `txn-${Date.now()}`;
     const txnPayload = {
       id: transactionId,
+      subscriptionId: selectedSubToPay.id,
       title: `${selectedSubToPay.name} (Recurring)`,
       amount: selectedSubToPay.amount,
       type: 'expense',
