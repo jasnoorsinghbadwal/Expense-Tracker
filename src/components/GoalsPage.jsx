@@ -95,6 +95,7 @@ export function GoalsPage() {
       
       const newTx = {
         id: `tx-goal-init-${Date.now()}`,
+        goalId: newGoal.id,
         title: `Goal Allocation: ${goalName}`,
         amount: initialVal,
         type: 'expense',
@@ -148,6 +149,7 @@ export function GoalsPage() {
       // 2. Log Deduction Transaction
       const newTx = {
         id: `tx-goal-${Date.now()}`,
+        goalId: goal.id,
         title: `Goal Contribution: ${goal.name}`,
         amount: amountVal,
         type: 'expense',

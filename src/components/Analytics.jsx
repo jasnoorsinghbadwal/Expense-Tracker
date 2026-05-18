@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { useFinance } from '../context/FinanceContext';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Target, Receipt, Shield } from 'lucide-react';
 import { CATEGORIES } from '../utils/constants';
 import { isTransactionInPeriod, getPeriodDates, parseLocalDate } from '../utils/dateFilters';
 import { Forecaster } from './Forecaster';
@@ -11,6 +11,7 @@ export function Analytics() {
   const currency = state.settings.currency;
   const isDark = state.settings.theme === 'dark';
   const [activeSubTab, setActiveSubTab] = useState('stats');
+  const [breakdownType, setBreakdownType] = useState('category'); // 'category' or 'type'
 
   const periodLabel = useMemo(() => {
     const { selectedPeriod, customStartDate, customEndDate } = state.settings;
@@ -105,31 +106,80 @@ export function Analytics() {
   }, [state.settings.selectedPeriod, periodLabel]);
 
   const pieData = useMemo(() => {
-    const totals = {};
     let totalSpent = 0;
 
-    state.transactions.forEach(t => {
-      if (t.type === 'expense') {
-        const isInPeriod = isTransactionInPeriod(t.date, state.settings.selectedPeriod, state.settings.customStartDate, state.settings.customEndDate);
-        if (isInPeriod) {
-          totals[t.category] = (totals[t.category] || 0) + t.amount;
-          totalSpent += t.amount;
+    if (breakdownType === 'category') {
+      const totals = {};
+      state.transactions.forEach(t => {
+        if (t.type === 'expense') {
+          const isInPeriod = isTransactionInPeriod(t.date, state.settings.selectedPeriod, state.settings.customStartDate, state.settings.customEndDate);
+          if (isInPeriod) {
+            totals[t.category] = (totals[t.category] || 0) + t.amount;
+            totalSpent += t.amount;
+          }
         }
-      }
-    });
+      });
 
-    const data = Object.keys(totals).map(catId => {
-      const cat = CATEGORIES.find(c => c.id === catId);
-      return {
-        name: cat ? cat.label : 'Other',
-        value: totals[catId],
-        color: cat ? cat.color : '#6B7280',
-        icon: cat ? cat.icon : Sparkles
-      };
-    }).sort((a, b) => b.value - a.value);
+      const data = Object.keys(totals).map(catId => {
+        const cat = CATEGORIES.find(c => c.id === catId);
+        return {
+          name: cat ? cat.label : 'Other',
+          value: totals[catId],
+          color: cat ? cat.color : '#6B7280',
+          icon: cat ? cat.icon : Sparkles
+        };
+      }).sort((a, b) => b.value - a.value);
 
-    return { data, totalSpent };
-  }, [state.transactions, state.settings.selectedPeriod, state.settings.customStartDate, state.settings.customEndDate]);
+      return { data, totalSpent };
+    } else {
+      // breakdownType === 'type'
+      let subTotal = 0;
+      let savingsTotal = 0;
+      let budgetedTotal = 0;
+      let oneoffTotal = 0;
+
+      const activeBudgetedCategories = new Set(
+        (state.budgets || []).filter(b => !b.dismissed).map(b => b.category)
+      );
+
+      state.transactions.forEach(t => {
+        if (t.type === 'expense') {
+          const isInPeriod = isTransactionInPeriod(t.date, state.settings.selectedPeriod, state.settings.customStartDate, state.settings.customEndDate);
+          if (isInPeriod) {
+            totalSpent += t.amount;
+
+            // 1. Subscription check
+            if (t.subscriptionId || t.title.includes('(Recurring)')) {
+              subTotal += t.amount;
+            }
+            // 2. Savings check
+            else if (t.goalId || t.title.startsWith('Goal Allocation:') || t.title.startsWith('Goal Contribution:')) {
+              savingsTotal += t.amount;
+            }
+            // 3. Budgeted check
+            else if (activeBudgetedCategories.has(t.category)) {
+              budgetedTotal += t.amount;
+            }
+            // 4. One-off check
+            else {
+              oneoffTotal += t.amount;
+            }
+          }
+        }
+      });
+
+      const data = [
+        { name: 'Subscriptions & Bills', value: subTotal, color: '#06B6D4', icon: Receipt },
+        { name: 'Savings Goals', value: savingsTotal, color: '#10B981', icon: Target },
+        { name: 'Budgeted Expenses', value: budgetedTotal, color: '#8B5CF6', icon: Shield },
+        { name: 'One-Off Expenses', value: oneoffTotal, color: '#F5A623', icon: Sparkles }
+      ]
+        .filter(item => item.value > 0)
+        .sort((a, b) => b.value - a.value);
+
+      return { data, totalSpent };
+    }
+  }, [state.transactions, state.budgets, state.settings.selectedPeriod, state.settings.customStartDate, state.settings.customEndDate, breakdownType]);
 
   // Check if we are on a mobile/touch viewport dynamically for tooltip activation
   const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches;
@@ -189,25 +239,43 @@ export function Analytics() {
 
           {/* Expenses Breakdown Pie Chart */}
           <div className="glass p-5 md:p-6 rounded-2xl h-[350px] md:h-[400px] flex flex-col relative">
-            <h3 className="text-base md:text-lg font-semibold tracking-wide mb-4 md:mb-6 text-gray-900 dark:text-white truncate">Expense Breakdown ({periodLabel})</h3>
+            <div className="flex flex-row items-center justify-between gap-3 mb-4 md:mb-6 shrink-0 min-w-0">
+              <h3 className="text-sm sm:text-base md:text-lg font-semibold tracking-wide text-gray-900 dark:text-white truncate">Expense Breakdown</h3>
+              
+              <div className="flex bg-gray-100 dark:bg-charcoal-800 p-0.5 rounded-lg border border-gray-200 dark:border-white/5 shadow-inner flex-shrink-0">
+                <button
+                  onClick={() => setBreakdownType('category')}
+                  className={`px-2.5 py-1 text-[10px] sm:text-xs font-bold rounded-md transition-all ${breakdownType === 'category' ? 'bg-white dark:bg-charcoal-700 text-gold-500 dark:text-gold-400 shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
+                >
+                  📁 Categories
+                </button>
+                <button
+                  onClick={() => setBreakdownType('type')}
+                  className={`px-2.5 py-1 text-[10px] sm:text-xs font-bold rounded-md transition-all ${breakdownType === 'type' ? 'bg-white dark:bg-charcoal-700 text-gold-500 dark:text-gold-400 shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
+                >
+                  ⚡ Types
+                </button>
+              </div>
+            </div>
+
             <div className="flex-1 min-h-0">
               {pieData.data.length === 0 ? (
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-500">
                   <p className="text-sm md:text-base">No expenses in this period</p>
                 </div>
               ) : (
-                <div className="flex flex-col sm:flex-row items-center gap-6 h-full min-h-0">
+                <div className="flex flex-row items-center gap-4 h-full min-h-0">
                   {/* Donut Chart Container */}
-                  <div className="relative w-full sm:w-[45%] h-[160px] sm:h-[220px] flex-shrink-0 flex items-center justify-center">
+                  <div className="relative w-[38%] sm:w-[45%] h-[120px] sm:h-[220px] flex-shrink-0 flex items-center justify-center">
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
                           data={pieData.data}
                           cx="50%"
                           cy="50%"
-                          innerRadius={55}
-                          outerRadius={75}
-                          paddingAngle={4}
+                          innerRadius={isMobile ? 35 : 55}
+                          outerRadius={isMobile ? 48 : 75}
+                          paddingAngle={3}
                           dataKey="value"
                           stroke="none"
                         >
@@ -226,30 +294,30 @@ export function Analytics() {
                     </ResponsiveContainer>
                     {/* Center Text for Donut */}
                     <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                       <span className="text-[10px] uppercase font-bold tracking-wider text-gray-400 dark:text-gray-500">Spent</span>
-                       <span className="text-base sm:text-lg font-mono font-bold text-gray-900 dark:text-white mt-0.5">{currency}{pieData.totalSpent.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                       <span className="text-[8px] sm:text-[10px] uppercase font-bold tracking-wider text-gray-400 dark:text-gray-500">Spent</span>
+                       <span className="text-xs sm:text-lg font-mono font-bold text-gray-900 dark:text-white mt-0.5">{currency}{pieData.totalSpent.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
                     </div>
                   </div>
 
                   {/* Detailed Categories List */}
-                  <div className="flex-1 w-full overflow-y-auto max-h-[160px] sm:max-h-[220px] pr-1 space-y-3 custom-scrollbar">
+                  <div className="flex-1 w-full overflow-y-auto max-h-[220px] pr-1 space-y-2.5 sm:space-y-3 custom-scrollbar">
                     {pieData.data.map((entry, index) => {
                       const pct = pieData.totalSpent > 0 ? ((entry.value / pieData.totalSpent) * 100).toFixed(1) : 0;
                       const IconComponent = entry.icon || Sparkles;
                       return (
                         <div key={index} className="space-y-1">
-                          <div className="flex justify-between items-center text-xs">
-                            <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300 font-medium">
-                              <span className="p-1 rounded-lg bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 flex items-center justify-center" style={{ color: entry.color }}>
-                                <IconComponent size={12} />
+                          <div className="flex justify-between items-center text-[10px] sm:text-xs">
+                            <div className="flex items-center gap-1.5 sm:gap-2 text-gray-700 dark:text-gray-300 font-medium min-w-0">
+                              <span className="p-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 flex items-center justify-center flex-shrink-0" style={{ color: entry.color }}>
+                                <IconComponent size={10} />
                               </span>
-                              <span className="truncate max-w-[100px] sm:max-w-[120px]">{entry.name}</span>
-                              <span className="text-[10px] text-gray-400 dark:text-gray-500 font-mono font-bold">{pct}%</span>
+                              <span className="truncate max-w-[70px] sm:max-w-[120px]">{entry.name}</span>
+                              <span className="text-[8px] sm:text-[10px] text-gray-400 dark:text-gray-500 font-mono font-bold flex-shrink-0">{pct}%</span>
                             </div>
-                            <span className="font-mono font-bold text-gray-900 dark:text-white">{currency}{entry.value.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                            <span className="font-mono font-bold text-gray-900 dark:text-white flex-shrink-0">{currency}{entry.value.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
                           </div>
                           {/* Visual Progress Bar */}
-                          <div className="h-1.5 w-full bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden">
+                          <div className="h-1 sm:h-1.5 w-full bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden">
                             <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, backgroundColor: entry.color }} />
                           </div>
                         </div>
@@ -260,7 +328,6 @@ export function Analytics() {
               )}
             </div>
           </div>
-
         </div>
       ) : (
         <div className="animate-in fade-in duration-300">
