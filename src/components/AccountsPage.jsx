@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useFinance } from '../context/FinanceContext';
-import { Wallet, Building2, CreditCard, Plus, Edit2, Trash2, X, Check } from 'lucide-react';
+import { Wallet, Building2, CreditCard, Plus, Edit2, Trash2, X, Check, TrendingUp, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export function AccountsPage() {
@@ -9,6 +9,7 @@ export function AccountsPage() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editData, setEditData] = useState(null);
+  const [selectedInsightsAccount, setSelectedInsightsAccount] = useState(null);
 
   const [name, setName] = useState('');
   const [type, setType] = useState('bank');
@@ -141,6 +142,13 @@ export function AccountsPage() {
                      {currency}{currentBalance.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                    </p>
                 </div>
+
+                <button
+                  onClick={() => setSelectedInsightsAccount(account)}
+                  className="w-full mt-4 py-2.5 bg-gold-500/10 hover:bg-gold-500/20 text-gold-600 dark:text-gold-400 font-bold rounded-xl text-xs transition-all active:scale-98 flex items-center justify-center gap-1.5 border border-gold-500/10"
+                >
+                  <TrendingUp size={14} /> View Wallet Insights
+                </button>
               </div>
             );
           })}
@@ -189,6 +197,172 @@ export function AccountsPage() {
           </div>
         </div>
       )}
+
+      {selectedInsightsAccount && (() => {
+        const acc = selectedInsightsAccount;
+        const currentBalance = getAccountBalance(acc.id);
+        const walletTransactions = state.transactions.filter(t => t.accountId === acc.id);
+        
+        let totalIncome = 0;
+        let totalExpenses = 0;
+        const categoryTotals = {};
+        
+        walletTransactions.forEach(t => {
+          if (t.type === 'income') {
+            totalIncome += t.amount;
+          } else {
+            totalExpenses += t.amount;
+            categoryTotals[t.category] = (categoryTotals[t.category] || 0) + t.amount;
+          }
+        });
+
+        // Sorted Categories
+        const sortedCategories = Object.keys(categoryTotals).map(catId => {
+          // Find standard categories or user-added categories
+          let label = catId;
+          let color = '#F5A623';
+          
+          if (catId === 'food') { label = 'Food & Dining'; color = '#FF9F43'; }
+          else if (catId === 'shopping') { label = 'Shopping'; color = '#48DBFB'; }
+          else if (catId === 'bills') { label = 'Bills & Utilities'; color = '#FF6B6B'; }
+          else if (catId === 'entertainment') { label = 'Entertainment'; color = '#1DD1A1'; }
+          else if (catId === 'transport') { label = 'Travel & Commute'; color = '#5f27cd'; }
+          else if (catId === 'health') { label = 'Medical & Fitness'; color = '#ff9ff3'; }
+          else if (catId === 'education') { label = 'Education'; color = '#00d2d3'; }
+          else if (catId === 'other') { label = 'Others'; color = '#8395a7'; }
+          else if (catId === 'income') { label = 'Salary & Income'; color = '#10b981'; }
+
+          return {
+            id: catId,
+            label,
+            color,
+            amount: categoryTotals[catId],
+            pct: totalExpenses > 0 ? Math.round((categoryTotals[catId] / totalExpenses) * 100) : 0
+          };
+        }).sort((a, b) => b.amount - a.amount);
+
+        const recentWalletTxns = [...walletTransactions]
+          .sort((a, b) => new Date(b.date) - new Date(a.date))
+          .slice(0, 5);
+
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-gray-900/55 dark:bg-navy-950/85 backdrop-blur-md animate-in fade-in duration-300" onClick={() => setSelectedInsightsAccount(null)}></div>
+            <div className="relative w-full max-w-2xl glass rounded-3xl p-6 md:p-8 shadow-2xl border border-gray-200 dark:border-white/10 animate-in zoom-in-95 fade-in duration-300 max-h-[90vh] overflow-y-auto custom-scrollbar">
+               
+               {/* Modal Header */}
+               <div className="flex justify-between items-center mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-gold-500/10 text-gold-600 dark:text-gold-400 flex items-center justify-center shrink-0">
+                      <TrendingUp size={20} />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-900 dark:text-white">{acc.name} Insights</h3>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">{acc.type} Wallet Analytics</p>
+                    </div>
+                  </div>
+                  <button onClick={() => setSelectedInsightsAccount(null)} className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full transition-colors"><X size={20} /></button>
+               </div>
+
+               {/* Balance Metrics Grid */}
+               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                  <div className="bg-gray-50 dark:bg-charcoal-900/50 p-4 rounded-2xl border border-gray-100 dark:border-white/5">
+                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Current Balance</p>
+                    <p className="font-mono text-xl font-bold text-gray-900 dark:text-white mt-1">
+                      {currency}{currentBalance.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    </p>
+                  </div>
+                  <div className="bg-emerald-500/5 dark:bg-emerald-500/10 p-4 rounded-2xl border border-emerald-500/10">
+                    <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider">Total Incomes</p>
+                    <p className="font-mono text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-1 flex items-center gap-1">
+                      <ArrowUpRight size={16} />
+                      {currency}{totalIncome.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    </p>
+                  </div>
+                  <div className="bg-rose-500/5 dark:bg-rose-500/10 p-4 rounded-2xl border border-rose-500/10">
+                    <p className="text-[10px] text-rose-600 dark:text-rose-400 font-bold uppercase tracking-wider">Total Expenses</p>
+                    <p className="font-mono text-xl font-bold text-rose-600 dark:text-rose-400 mt-1 flex items-center gap-1">
+                      <ArrowDownRight size={16} />
+                      {currency}{totalExpenses.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    </p>
+                  </div>
+               </div>
+
+               {/* Spending Breakdown */}
+               <div className="mb-6">
+                  <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-4 uppercase tracking-wider">Where Spent (Category Breakdown)</h4>
+                  {sortedCategories.length === 0 ? (
+                    <div className="p-6 text-center text-gray-500 text-xs bg-gray-50 dark:bg-charcoal-900/30 rounded-2xl border border-dashed border-gray-200 dark:border-white/5">
+                      No expense transactions recorded from this wallet yet.
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {sortedCategories.map(cat => (
+                        <div key={cat.id} className="space-y-1">
+                          <div className="flex justify-between items-center text-xs">
+                            <span className="font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
+                              <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: cat.color }}></span>
+                              {cat.label}
+                            </span>
+                            <span className="font-mono font-semibold text-gray-900 dark:text-white">
+                              {currency}{cat.amount.toLocaleString()} <span className="text-[10px] text-gray-500 font-normal">({cat.pct}%)</span>
+                            </span>
+                          </div>
+                          <div className="w-full h-2 bg-gray-100 dark:bg-charcoal-800 rounded-full overflow-hidden">
+                            <div className="h-full rounded-full transition-all duration-500" style={{ backgroundColor: cat.color, width: `${cat.pct}%` }} />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+               </div>
+
+               {/* Recent Transactions List */}
+               <div>
+                  <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-4 uppercase tracking-wider">Recent Transactions ({acc.name})</h4>
+                  {recentWalletTxns.length === 0 ? (
+                    <div className="p-6 text-center text-gray-500 text-xs bg-gray-50 dark:bg-charcoal-900/30 rounded-2xl border border-dashed border-gray-200 dark:border-white/5">
+                      No transactions recorded.
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {recentWalletTxns.map(t => {
+                        let catLabel = t.category;
+                        let catColor = '#6b7280';
+                        if (t.category === 'food') { catLabel = 'Food & Dining'; catColor = '#FF9F43'; }
+                        else if (t.category === 'shopping') { catLabel = 'Shopping'; catColor = '#48DBFB'; }
+                        else if (t.category === 'bills') { catLabel = 'Bills & Utilities'; catColor = '#FF6B6B'; }
+                        else if (t.category === 'entertainment') { catLabel = 'Entertainment'; catColor = '#1DD1A1'; }
+                        else if (t.category === 'transport') { catLabel = 'Travel & Commute'; catColor = '#5f27cd'; }
+                        else if (t.category === 'health') { catLabel = 'Medical & Fitness'; catColor = '#ff9ff3'; }
+                        else if (t.category === 'education') { catLabel = 'Education'; catColor = '#00d2d3'; }
+                        else if (t.category === 'other') { catLabel = 'Others'; catColor = '#8395a7'; }
+                        else if (t.category === 'income') { catLabel = 'Salary & Income'; catColor = '#10b981'; }
+
+                        return (
+                          <div key={t.id} className="flex justify-between items-center p-3 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 text-xs">
+                            <div>
+                              <p className="font-semibold text-gray-900 dark:text-white">{t.title}</p>
+                              <div className="flex items-center gap-1.5 mt-0.5 text-[10px] text-gray-500 dark:text-gray-400">
+                                <span>{t.date}</span>
+                                <span>·</span>
+                                <span className="capitalize font-semibold" style={{ color: catColor }}>{catLabel}</span>
+                              </div>
+                            </div>
+                            <span className={`font-mono font-semibold ${t.type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-900 dark:text-white'}`}>
+                              {t.type === 'income' ? '+' : '-'}{currency}{t.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+               </div>
+
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }
