@@ -3,6 +3,7 @@ import { useFinance } from '../context/FinanceContext';
 import { Target, AlertCircle, Plus, X, Trash2, Calendar, Award, History, Timer } from 'lucide-react';
 import { CATEGORIES, getCategory } from '../utils/constants';
 import { getBudgetStatus, parseLocalDate, getPeriodDates } from '../utils/dateFilters';
+import { endOfMonth, endOfWeek } from 'date-fns';
 import toast from 'react-hot-toast';
 
 export function BudgetPlanner() {
@@ -263,6 +264,31 @@ export function BudgetPlanner() {
                    />
                  </div>
                )}
+
+               {(budgetPeriod === 'monthly' || budgetPeriod === 'weekly') && (
+                 <div>
+                   <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1.5 ml-1">End Date (Auto-calculated)</label>
+                   <input 
+                     type="text"
+                     value={(() => {
+                       if (!startDate) return '';
+                       try {
+                         const d = parseLocalDate(startDate);
+                         if (isNaN(d.getTime())) return '';
+                         if (budgetPeriod === 'monthly') {
+                           return endOfMonth(d).toLocaleDateString();
+                         }
+                         if (budgetPeriod === 'weekly') {
+                           return endOfWeek(d, { weekStartsOn: 1 }).toLocaleDateString();
+                         }
+                       } catch (e) { return ''; }
+                       return '';
+                     })()}
+                     disabled
+                     className="w-full bg-gray-100 dark:bg-charcoal-800 border border-gray-200 dark:border-white/10 rounded-xl py-3 px-3 outline-none text-sm text-gray-500 dark:text-gray-400 cursor-not-allowed"
+                   />
+                 </div>
+               )}
              </div>
 
              <div className="flex justify-end gap-2 pt-2">
@@ -453,13 +479,21 @@ export function BudgetPlanner() {
                          <div className="absolute inset-0 bg-white/20"></div>
                        </div>
                     </div>
-                    <div className="mt-2 md:mt-3 flex justify-between text-[10px] md:text-xs font-medium">
+                    <div className="mt-2 md:mt-3 flex justify-between text-[10px] md:text-xs font-medium mb-1">
                        <span className="text-gray-500 dark:text-gray-400">{percentage.toFixed(1)}% used</span>
                        <span className={textColor}>
                          {isOverBudget ? `Exceeded by ${currency}${(cat.spent - cat.amount).toLocaleString(undefined, { maximumFractionDigits: 0 })}` : `${currency}${(cat.amount - cat.spent).toLocaleString(undefined, { maximumFractionDigits: 0 })} left`}
                        </span>
                     </div>
                   </div>
+
+                  {cat.period !== 'ongoing' && (
+                    <div className="mt-3 pt-3 border-t border-gray-200 dark:border-white/5 text-[10px] text-gray-400 dark:text-gray-500 flex items-center justify-center gap-1">
+                      <Calendar size={12} />
+                      Starts: {formatLocalDate(cat.startDate)}
+                      {cat.endDate && ` - Ends: ${formatLocalDate(cat.endDate)}`}
+                    </div>
+                  )}
                 </div>
               );
             })}

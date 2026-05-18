@@ -9,6 +9,9 @@ import {
 
 export function parseLocalDate(dateStr) {
   if (!dateStr) return new Date();
+  if (dateStr instanceof Date) return dateStr;
+  if (typeof dateStr !== 'string') return new Date(dateStr);
+  
   const parts = dateStr.split('-');
   if (parts.length === 3) {
     const year = parseInt(parts[0], 10);
