@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useFinance } from '../context/FinanceContext';
 import { Wallet, Building2, CreditCard, Plus, Edit2, Trash2, X, Check, TrendingUp, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { CATEGORIES } from '../utils/constants';
 
 export function AccountsPage() {
   const { state, dispatch } = useFinance();
@@ -218,19 +219,9 @@ export function AccountsPage() {
 
         // Sorted Categories
         const sortedCategories = Object.keys(categoryTotals).map(catId => {
-          // Find standard categories or user-added categories
-          let label = catId;
-          let color = '#F5A623';
-          
-          if (catId === 'food') { label = 'Food & Dining'; color = '#FF9F43'; }
-          else if (catId === 'shopping') { label = 'Shopping'; color = '#48DBFB'; }
-          else if (catId === 'bills') { label = 'Bills & Utilities'; color = '#FF6B6B'; }
-          else if (catId === 'entertainment') { label = 'Entertainment'; color = '#1DD1A1'; }
-          else if (catId === 'transport') { label = 'Travel & Commute'; color = '#5f27cd'; }
-          else if (catId === 'health') { label = 'Medical & Fitness'; color = '#ff9ff3'; }
-          else if (catId === 'education') { label = 'Education'; color = '#00d2d3'; }
-          else if (catId === 'other') { label = 'Others'; color = '#8395a7'; }
-          else if (catId === 'income') { label = 'Salary & Income'; color = '#10b981'; }
+          const cat = CATEGORIES.find(c => c.id === catId);
+          const label = cat ? cat.label : 'Others';
+          const color = cat ? cat.color : '#8395a7';
 
           return {
             id: catId,

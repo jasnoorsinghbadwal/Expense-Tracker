@@ -11,7 +11,6 @@ export function Analytics() {
   const currency = state.settings.currency;
   const isDark = state.settings.theme === 'dark';
   const [activeSubTab, setActiveSubTab] = useState('stats');
-  const [breakdownType, setBreakdownType] = useState('category'); // 'category' or 'type'
 
   const periodLabel = useMemo(() => {
     const { selectedPeriod, customStartDate, customEndDate } = state.settings;
@@ -107,79 +106,30 @@ export function Analytics() {
 
   const pieData = useMemo(() => {
     let totalSpent = 0;
+    const totals = {};
 
-    if (breakdownType === 'category') {
-      const totals = {};
-      state.transactions.forEach(t => {
-        if (t.type === 'expense') {
-          const isInPeriod = isTransactionInPeriod(t.date, state.settings.selectedPeriod, state.settings.customStartDate, state.settings.customEndDate);
-          if (isInPeriod) {
-            totals[t.category] = (totals[t.category] || 0) + t.amount;
-            totalSpent += t.amount;
-          }
+    state.transactions.forEach(t => {
+      if (t.type === 'expense') {
+        const isInPeriod = isTransactionInPeriod(t.date, state.settings.selectedPeriod, state.settings.customStartDate, state.settings.customEndDate);
+        if (isInPeriod) {
+          totals[t.category] = (totals[t.category] || 0) + t.amount;
+          totalSpent += t.amount;
         }
-      });
+      }
+    });
 
-      const data = Object.keys(totals).map(catId => {
-        const cat = CATEGORIES.find(c => c.id === catId);
-        return {
-          name: cat ? cat.label : 'Other',
-          value: totals[catId],
-          color: cat ? cat.color : '#6B7280',
-          icon: cat ? cat.icon : Sparkles
-        };
-      }).sort((a, b) => b.value - a.value);
+    const data = Object.keys(totals).map(catId => {
+      const cat = CATEGORIES.find(c => c.id === catId);
+      return {
+        name: cat ? cat.label : 'Others',
+        value: totals[catId],
+        color: cat ? cat.color : '#6B7280',
+        icon: cat ? cat.icon : Sparkles
+      };
+    }).sort((a, b) => b.value - a.value);
 
-      return { data, totalSpent };
-    } else {
-      // breakdownType === 'type'
-      let subTotal = 0;
-      let savingsTotal = 0;
-      let budgetedTotal = 0;
-      let oneoffTotal = 0;
-
-      const activeBudgetedCategories = new Set(
-        (state.budgets || []).filter(b => !b.dismissed).map(b => b.category)
-      );
-
-      state.transactions.forEach(t => {
-        if (t.type === 'expense') {
-          const isInPeriod = isTransactionInPeriod(t.date, state.settings.selectedPeriod, state.settings.customStartDate, state.settings.customEndDate);
-          if (isInPeriod) {
-            totalSpent += t.amount;
-
-            // 1. Subscription check
-            if (t.subscriptionId || t.title.includes('(Recurring)')) {
-              subTotal += t.amount;
-            }
-            // 2. Savings check
-            else if (t.goalId || t.title.startsWith('Goal Allocation:') || t.title.startsWith('Goal Contribution:')) {
-              savingsTotal += t.amount;
-            }
-            // 3. Budgeted check
-            else if (activeBudgetedCategories.has(t.category)) {
-              budgetedTotal += t.amount;
-            }
-            // 4. One-off check
-            else {
-              oneoffTotal += t.amount;
-            }
-          }
-        }
-      });
-
-      const data = [
-        { name: 'Subscriptions & Bills', value: subTotal, color: '#06B6D4', icon: Receipt },
-        { name: 'Savings Goals', value: savingsTotal, color: '#10B981', icon: Target },
-        { name: 'Budgeted Expenses', value: budgetedTotal, color: '#8B5CF6', icon: Shield },
-        { name: 'One-Off Expenses', value: oneoffTotal, color: '#F5A623', icon: Sparkles }
-      ]
-        .filter(item => item.value > 0)
-        .sort((a, b) => b.value - a.value);
-
-      return { data, totalSpent };
-    }
-  }, [state.transactions, state.budgets, state.settings.selectedPeriod, state.settings.customStartDate, state.settings.customEndDate, breakdownType]);
+    return { data, totalSpent };
+  }, [state.transactions, state.settings.selectedPeriod, state.settings.customStartDate, state.settings.customEndDate]);
 
   // Check if we are on a mobile/touch viewport dynamically for tooltip activation
   const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches;
@@ -237,25 +187,9 @@ export function Analytics() {
             )}
           </div>
 
-          {/* Expenses Breakdown Pie Chart */}
           <div className="glass p-5 md:p-6 rounded-2xl h-[350px] md:h-[400px] flex flex-col relative">
             <div className="flex flex-row items-center justify-between gap-3 mb-4 md:mb-6 shrink-0 min-w-0">
-              <h3 className="text-sm sm:text-base md:text-lg font-semibold tracking-wide text-gray-900 dark:text-white truncate">Expense Breakdown</h3>
-              
-              <div className="flex bg-gray-100 dark:bg-charcoal-800 p-0.5 rounded-lg border border-gray-200 dark:border-white/5 shadow-inner flex-shrink-0">
-                <button
-                  onClick={() => setBreakdownType('category')}
-                  className={`px-2.5 py-1 text-[10px] sm:text-xs font-bold rounded-md transition-all ${breakdownType === 'category' ? 'bg-white dark:bg-charcoal-700 text-gold-500 dark:text-gold-400 shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
-                >
-                  📁 Categories
-                </button>
-                <button
-                  onClick={() => setBreakdownType('type')}
-                  className={`px-2.5 py-1 text-[10px] sm:text-xs font-bold rounded-md transition-all ${breakdownType === 'type' ? 'bg-white dark:bg-charcoal-700 text-gold-500 dark:text-gold-400 shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
-                >
-                  ⚡ Types
-                </button>
-              </div>
+              <h3 className="text-sm sm:text-base md:text-lg font-semibold tracking-wide text-gray-900 dark:text-white truncate">Category Breakdown</h3>
             </div>
 
             <div className="flex-1 min-h-0">

@@ -99,7 +99,7 @@ export function GoalsPage() {
         title: `Goal Allocation: ${goalName}`,
         amount: initialVal,
         type: 'expense',
-        category: 'other',
+        category: 'savings',
         accountId: selectedWalletId,
         date: new Date().toISOString().split('T')[0]
       };
@@ -153,7 +153,7 @@ export function GoalsPage() {
         title: `Goal Contribution: ${goal.name}`,
         amount: amountVal,
         type: 'expense',
-        category: 'other',
+        category: 'savings',
         accountId: selectedWalletId,
         date: new Date().toISOString().split('T')[0]
       };
