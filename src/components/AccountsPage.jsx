@@ -237,9 +237,12 @@ export function AccountsPage() {
           .slice(0, 5);
 
         return (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
             <div className="absolute inset-0 bg-gray-900/55 dark:bg-navy-950/85 backdrop-blur-md animate-in fade-in duration-300" onClick={() => setSelectedInsightsAccount(null)}></div>
-            <div className="relative w-full max-w-2xl glass rounded-3xl p-5 md:p-8 shadow-2xl border border-gray-200 dark:border-white/10 animate-in zoom-in-95 fade-in duration-300 max-h-[85vh] md:max-h-[90vh] flex flex-col">
+            <div className="relative w-full max-w-2xl glass rounded-t-[2rem] sm:rounded-3xl p-5 sm:p-8 shadow-2xl border-t sm:border border-gray-200 dark:border-white/10 animate-in slide-in-from-bottom sm:zoom-in-95 fade-in duration-300 max-h-[82vh] sm:max-h-[90vh] flex flex-col">
+               
+               {/* Mobile Pull/Drag Indicator Handle */}
+               <div className="w-12 h-1.5 bg-gray-300 dark:bg-white/10 rounded-full mx-auto mb-4 shrink-0 sm:hidden"></div>
                
                {/* Modal Header */}
                <div className="flex justify-between items-center mb-5 shrink-0">

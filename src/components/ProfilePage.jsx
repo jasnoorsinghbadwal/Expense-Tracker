@@ -172,7 +172,7 @@ export function ProfilePage() {
   };
 
   return (
-    <div className="space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 h-full pb-4 max-w-4xl mx-auto">
+    <div className="space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 h-full pb-4 max-w-7xl mx-auto px-2 sm:px-4 md:px-8">
       <div className="glass p-5 md:p-6 rounded-2xl flex items-center gap-4">
         <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-gold-500 to-amber-300 flex items-center justify-center text-navy-900 shadow-lg shadow-gold-500/20 shrink-0">
           <User size={32} />
@@ -183,9 +183,9 @@ export function ProfilePage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-start">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 items-start">
         
-        {/* Left Column: Personal Settings & Security */}
+        {/* Column 1: Personal Settings & Security */}
         <div className="space-y-6 md:space-y-8">
           {/* Profile Settings */}
           <div className="glass p-5 md:p-6 rounded-2xl">
@@ -241,7 +241,7 @@ export function ProfilePage() {
           </div>
         </div>
 
-        {/* Right Column: Backup, App Updates & Danger Zone */}
+        {/* Column 2: Backup & Access Control */}
         <div className="space-y-6 md:space-y-8">
           {/* Sync & Backups */}
           <div className="glass p-5 md:p-6 rounded-2xl">
@@ -267,6 +267,42 @@ export function ProfilePage() {
                   className="hidden" 
                 />
               </label>
+            </div>
+          </div>
+
+          {/* Account Access */}
+          <div className="glass p-5 md:p-6 rounded-2xl border border-rose-200 dark:border-rose-500/20">
+            <h3 className="text-lg font-semibold mb-2 text-rose-600 dark:text-rose-400">Account Access</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">Log out of your current session. You can choose to keep your data locally or wipe it clean.</p>
+            <button 
+              onClick={() => setIsLogoutModalOpen(true)}
+              className="w-full py-3.5 bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 font-bold rounded-xl transition-all flex items-center justify-center gap-2"
+            >
+              <LogOut size={18} /> Logout
+            </button>
+          </div>
+        </div>
+
+        {/* Column 3: Help & PWA Version Check */}
+        <div className="space-y-6 md:space-y-8">
+          {/* Help & Support / Developer Info Card */}
+          <div className="glass p-5 md:p-6 rounded-2xl border border-gold-500/20">
+            <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white font-sans flex items-center gap-2">
+              Help & Support
+            </h3>
+            <div className="text-xs md:text-sm text-gray-500 dark:text-gray-400 space-y-3">
+              <p>
+                <strong>PayTrix</strong> is a premium, high-fidelity personal finance tracker and cash-flow forecaster designed to give you complete visibility over your financial operations.
+              </p>
+              <div className="space-y-1.5 pl-2 border-l border-gold-500/40">
+                <p>⚡ <strong>Wallets & Accounts:</strong> Track cash, bank accounts, and cards in real-time.</p>
+                <p>📊 <strong>Multi-Dimensional Analytics:</strong> Drill down by Category or Expense Type.</p>
+                <p>🎯 <strong>Savings Goals:</strong> Create dedicated allocations and progress counters.</p>
+                <p>🔮 <strong>Forecasts & Coaching:</strong> Predictive cash flows and smart insights.</p>
+              </div>
+              <div className="pt-2 border-t border-gray-200 dark:border-white/10 text-xs">
+                Developed & Engineered with passion by <span className="font-bold text-gold-500 dark:text-gold-400">Jasnoor Singh Badwal</span>
+              </div>
             </div>
           </div>
 
@@ -305,40 +341,8 @@ export function ProfilePage() {
               </button>
             )}
           </div>
-
-          {/* Help & Support / Developer Info Card */}
-          <div className="glass p-5 md:p-6 rounded-2xl border border-gold-500/20">
-            <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white font-sans flex items-center gap-2">
-              Help & Support
-            </h3>
-            <div className="text-xs md:text-sm text-gray-500 dark:text-gray-400 space-y-3">
-              <p>
-                <strong>PayTrix</strong> is a premium, high-fidelity personal finance tracker and cash-flow forecaster designed to give you complete visibility over your financial operations.
-              </p>
-              <div className="space-y-1.5 pl-2 border-l border-gold-500/40">
-                <p>⚡ <strong>Wallets & Accounts:</strong> Track cash, bank accounts, and cards in real-time.</p>
-                <p>📊 <strong>Multi-Dimensional Analytics:</strong> Drill down by Category or Expense Type.</p>
-                <p>🎯 <strong>Savings Goals:</strong> Create dedicated allocations and progress counters.</p>
-                <p>🔮 <strong>Forecasts & Coaching:</strong> Predictive cash flows and smart insights.</p>
-              </div>
-              <div className="pt-2 border-t border-gray-200 dark:border-white/10 text-xs">
-                Developed & Engineered with passion by <span className="font-bold text-gold-500 dark:text-gold-400">Jasnoor Singh Badwal</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Account Access */}
-          <div className="glass p-5 md:p-6 rounded-2xl border border-rose-200 dark:border-rose-500/20">
-            <h3 className="text-lg font-semibold mb-2 text-rose-600 dark:text-rose-400">Account Access</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">Log out of your current session. You can choose to keep your data locally or wipe it clean.</p>
-            <button 
-              onClick={() => setIsLogoutModalOpen(true)}
-              className="w-full py-3.5 bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 font-bold rounded-xl transition-all flex items-center justify-center gap-2"
-            >
-              <LogOut size={18} /> Logout
-            </button>
-          </div>
         </div>
+
       </div>
 
       {/* Logout Modal */}
